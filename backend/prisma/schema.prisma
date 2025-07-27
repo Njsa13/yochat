@@ -14,17 +14,18 @@ datasource db {
 }
 
 model User {
-  userId           String     @id @default(uuid()) @db.VarChar(50) @map("user_id")
-  username         String     @unique @db.VarChar(50)
-  email            String     @unique @db.VarChar(50)
-  fullName         String     @map("full_name") @db.VarChar(100)
-  password         String     @db.VarChar(255)
-  isEmailVerified  Boolean    @default(false) @map("is_email_verified")
-  profilePicture   String     @default("") @map("profile_picture")
-  createdAt        DateTime   @default(now()) @map("created_at")
-  updatedAt        DateTime   @updatedAt @map("updated_at")
+  userId            String     @id @default(uuid()) @db.VarChar(50) @map("user_id")
+  username          String     @unique @db.VarChar(50)
+  email             String     @unique @db.VarChar(50)
+  fullName          String     @map("full_name") @db.VarChar(100)
+  password          String     @db.VarChar(255)
+  isEmailVerified   Boolean    @default(false) @map("is_email_verified")
+  profilePicture    String     @default("") @map("profile_picture")
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
 
-  messages         Message[]  @relation("UserMessages")
+  messages          Message[]  @relation("UserMessages")
+  emailVerification EmailVerification[]  @relation("UserEmailVerification")
 
   @@map("users")
 }
@@ -51,4 +52,17 @@ model Message {
   chatRoom    ChatRoom  @relation("ChatRoomMessages", fields: [chatRoomId], references: [chatRoomId])
 
   @@map("messages")
+}
+
+model EmailVerification {
+  emailVerificationId String    @id @default(uuid()) @db.VarChar(50) @map("email_verification_id")
+  token               String    @unique @db.VarChar(50)
+  expirationDate      DateTime
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  userId              String    @map("user_id") @db.VarChar(50)
+
+  user                User      @relation("UserEmailVerification", fields: [userId], references: [userId])
+
+  @@map("email_verification")
 }
