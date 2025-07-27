@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -14,36 +13,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model users {
-  user_id           String    @id @default(uuid())
-  username          String    @unique
-  email             String    @unique
-  full_name         String
-  password          String
-  is_email_verified Boolean   @default(false)
-  profile_picture   String    @default("")
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
+model User {
+  userId           String     @id @default(uuid()) @db.VarChar(50) @map("user_id")
+  username         String     @unique @db.VarChar(50)
+  email            String     @unique @db.VarChar(50)
+  fullName         String     @map("full_name") @db.VarChar(100)
+  password         String     @db.VarChar(255)
+  isEmailVerified  Boolean    @default(false) @map("is_email_verified")
+  profilePicture   String     @default("") @map("profile_picture")
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
 
-  messages          messages[]
+  messages         Message[]  @relation("UserMessages")
+
+  @@map("users")
 }
 
-model chat_room {
-  chat_room_id String    @id @default(uuid())
-  created_at   DateTime  @default(now())
+model ChatRoom {
+  chatRoomId String     @id @default(uuid()) @db.VarChar(50) @map("chat_room_id")
+  createdAt  DateTime   @default(now()) @map("created_at")
 
-  messages     messages[]
+  messages   Message[]  @relation("ChatRoomMessages")
+
+  @@map("chat_room")
 }
 
-model messages {
-  message_id   String   @id @default(uuid())
-  text         String?
-  image        String?
-  created_at   DateTime @default(now())
+model Message {
+  messageId   String    @id @default(uuid()) @db.VarChar(50) @map("message_id")
+  text        String?
+  image       String?
+  createdAt   DateTime  @default(now()) @map("created_at")
 
-  user_id      String
-  chat_room_id String
+  userId      String    @map("user_id") @db.VarChar(50)
+  chatRoomId  String    @map("chat_room_id") @db.VarChar(50)
 
-  user         users     @relation(fields: [user_id], references: [user_id])
-  chat_room    chat_room @relation(fields: [chat_room_id], references: [chat_room_id])
+  user        User      @relation("UserMessages", fields: [userId], references: [userId])
+  chatRoom    ChatRoom  @relation("ChatRoomMessages", fields: [chatRoomId], references: [chatRoomId])
+
+  @@map("messages")
 }
