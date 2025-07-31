@@ -1,0 +1,250 @@
+import passport from "passport";
+import bcrypt from "bcrypt";
+import { v4 } from "uuid";
+import nodemailer from "nodemailer";
+
+import prisma from "../prisma/client.js";
+import cloudinary from "../config/cloudinary.js";
+
+export const login = (req, res, next) => {
+  passport.authenticate("local", (error, result, info) => {
+    if (error) return next(error);
+    if (!result) {
+      const err = new Error(info.message);
+      err.status = info.status;
+      return next(err);
+    }
+
+    req.login(result, (error) => {
+      if (error) {
+        console.error("Error in login function: ", error);
+        if (error) return next(error);
+      }
+      return res.status(200).json({
+        message: "Login successful",
+        data: {
+          username: result.username,
+          email: result.email,
+          fullName: result.fullName,
+        },
+      });
+    });
+  })(req, res, next);
+};
+
+export const signup = async (req, res, next) => {
+  try {
+    const { username, email, fullName, password } = req.body;
+
+    const existingUsername = await prisma.user.findUnique({
+      select: { userId: true },
+      where: { username },
+    });
+    if (existingUsername) {
+      const err = new Error("Username already in use");
+      err.status = 409;
+      return next(err);
+    }
+
+    const existingEmail = await prisma.user.findUnique({
+      select: { userId: true },
+      where: { email },
+    });
+    if (existingEmail) {
+      const err = new Error("Email already in use");
+      err.status = 409;
+      return next(err);
+    }
+
+    bcrypt.hash(password, 10, async (error, hashedPassword) => {
+      if (error) {
+        throw error;
+      } else {
+        const result = await prisma.user.create({
+          data: { username, email, fullName, password: hashedPassword },
+        });
+        saveAndSendToken(result.userId, next);
+        res.status(201).json({
+          message: "New account created successfully",
+          data: {
+            username: result.username,
+            email: result.email,
+            fullName: result.fullName,
+          },
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Error in signup function: ", error);
+    next(error);
+  }
+};
+
+export const sendVerificationEmail = async (req, res, next) => {
+  try {
+    const { username } = req.query;
+    const user = await prisma.user.findUnique({
+      select: { userId: true, isEmailVerified: true },
+      where: { username },
+    });
+    if (user.isEmailVerified) {
+      const err = new Error("Email has been verified");
+      err.status = 409;
+      return next(err);
+    }
+    saveAndSendToken(user.userId, next);
+    res.status(200).json({ message: "Verification email successfully sent" });
+  } catch (error) {
+    console.error("Error in sendVerificationEmail function: ", error);
+    next(error);
+  }
+};
+
+export const saveAndSendToken = async (userId, next) => {
+  const unexpiredToken = await prisma.emailVerification.findFirst({
+    select: { emailVerificationId: true, expirationDate: true },
+    where: {
+      AND: [{ userId }, { expirationDate: { gt: new Date() } }],
+    },
+  });
+
+  if (unexpiredToken) {
+    const timeRemaining = Math.floor((unexpiredToken.expirationDate - new Date()) / 1000);
+    const err = new Error(`Please wait ${timeRemaining} seconds before trying again`);
+    err.status = 429;
+    return next(err);
+  }
+
+  const token = v4();
+  const expiration = process.env.EMAIL_VERIFICATION_EXPIRATION;
+  const result = await prisma.emailVerification.create({
+    data: {
+      token,
+      expirationDate: new Date(Date.now() + expiration * 1000),
+      user: {
+        connect: { userId },
+      },
+    },
+  });
+
+  const transporter = nodemailer.createTransport({
+    service: "Gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  await transporter.sendMail({
+    from: `"YoChat" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Email Verification",
+    html: `<p>Copy and paste the following token to verify your email: <b>${result.token}</b></p>`,
+  });
+};
+
+export const logout = (req, res, next) => {
+  req.logout((error) => {
+    if (error) return next(error);
+    res.status(200).json({ message: "Logout successful" });
+  });
+};
+
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const { token } = req.query;
+    const emailVerification = await prisma.emailVerification.findUnique({
+      where: { token },
+      include: {
+        user: true,
+      },
+    });
+    if (!emailVerification) {
+      const err = new Error("Token not found");
+      err.status = 404;
+      return next(err);
+    }
+    if (emailVerification.expirationDate < new Date()) {
+      const err = new Error("Token has expired");
+      err.status = 410;
+      return next(err);
+    }
+    if (!emailVerification.user) {
+      const err = new Error("User not found");
+      err.status = 404;
+      return next(err);
+    }
+    if (emailVerification.user.isEmailVerified) {
+      const err = new Error("Email has been verified");
+      err.status = 409;
+      return next(err);
+    }
+
+    const result = await prisma.user.update({
+      where: { userId: emailVerification.user.userId },
+      data: {
+        isEmailVerified: true,
+      },
+    });
+
+    req.login(result, (error) => {
+      if (error) {
+        if (error) throw error;
+      }
+      return res.status(200).json({
+        message: "Email successfully verified",
+        data: {
+          username: result.username,
+          email: result.email,
+          fullName: result.fullName,
+        },
+      });
+    });
+  } catch (error) {
+    console.error("Error in verifyEmail function: ", error);
+    next(error);
+  }
+};
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { username, fullName, profilePicture } = req.body;
+    const { userId } = req.user;
+
+    const existingUsername = await prisma.user.findUnique({
+      select: { userId: true },
+      where: { username },
+    });
+    if (existingUsername) {
+      const err = new Error("Username already in use");
+      err.status = 409;
+      next(err);
+    }
+
+    const uploadResponse = await cloudinary.uploader.upload(profilePicture);
+    const result = await prisma.user.update({
+      where: { userId },
+      data: {
+        username,
+        fullName,
+        profilePicture: uploadResponse.secure_url,
+      },
+    });
+
+    res.status(200).json({
+      message: "User profile successfully updated",
+      data: {
+        username: result.username,
+        fullName: result.fullName,
+        profilePicture: result.profilePicture,
+      },
+    });
+  } catch (error) {
+    console.error("Error in updateUser function: ", error);
+    next(error);
+  }
+};
+
+export const checkAuth = (req, res, next) => {
+  res.status(200).json(req.user);
+};
