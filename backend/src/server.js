@@ -4,12 +4,12 @@ import session from "express-session";
 
 import authRouter from "./routes/authRoutes.js";
 import errorHandler from "./middlewares/errorHandler.js";
-import passport from "./config/passport.js"
+import passport from "./config/passport.js";
 
 const app = e();
 const PORT = process.env.BACKEND_PORT;
 
-app.use(e.json());
+app.use(e.json({ limit: "50mb" }));
 app.use(
   session({
     secret: process.env.SESSION_SECRET,

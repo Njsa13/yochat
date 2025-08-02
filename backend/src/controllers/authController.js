@@ -18,7 +18,7 @@ export const login = (req, res, next) => {
     req.login(result, (error) => {
       if (error) {
         console.error("Error in login function: ", error);
-        if (error) return next(error);
+        return next(error);
       }
       return res.status(200).json({
         message: "Login successful",
@@ -63,14 +63,16 @@ export const signup = async (req, res, next) => {
         const result = await prisma.user.create({
           data: { username, email, fullName, password: hashedPassword },
         });
-        saveAndSendToken(result.userId, next);
-        res.status(201).json({
-          message: "New account created successfully",
-          data: {
-            username: result.username,
-            email: result.email,
-            fullName: result.fullName,
-          },
+        saveAndSendToken(result, (error) => {
+          if (error) return next(error);
+          res.status(201).json({
+            message: "New account created successfully",
+            data: {
+              username: result.username,
+              email: result.email,
+              fullName: result.fullName,
+            },
+          });
         });
       }
     });
@@ -84,27 +86,34 @@ export const sendVerificationEmail = async (req, res, next) => {
   try {
     const { username } = req.query;
     const user = await prisma.user.findUnique({
-      select: { userId: true, isEmailVerified: true },
+      select: { userId: true, isEmailVerified: true, email: true },
       where: { username },
     });
+    if (!user) {
+      const err = new Error("User not found");
+      err.status = 404;
+      return next(err);
+    }
     if (user.isEmailVerified) {
       const err = new Error("Email has been verified");
       err.status = 409;
       return next(err);
     }
-    saveAndSendToken(user.userId, next);
-    res.status(200).json({ message: "Verification email successfully sent" });
+    saveAndSendToken(user, (error) => {
+      if (error) return next(error);
+      res.status(200).json({ message: "Verification email successfully sent" });
+    });
   } catch (error) {
     console.error("Error in sendVerificationEmail function: ", error);
     next(error);
   }
 };
 
-export const saveAndSendToken = async (userId, next) => {
+export const saveAndSendToken = async (user, cb) => {
   const unexpiredToken = await prisma.emailVerification.findFirst({
     select: { emailVerificationId: true, expirationDate: true },
     where: {
-      AND: [{ userId }, { expirationDate: { gt: new Date() } }],
+      AND: [{ userId: user.userId }, { expirationDate: { gt: new Date() } }],
     },
   });
 
@@ -112,20 +121,10 @@ export const saveAndSendToken = async (userId, next) => {
     const timeRemaining = Math.floor((unexpiredToken.expirationDate - new Date()) / 1000);
     const err = new Error(`Please wait ${timeRemaining} seconds before trying again`);
     err.status = 429;
-    return next(err);
+    return cb(err);
   }
 
   const token = v4();
-  const expiration = process.env.EMAIL_VERIFICATION_EXPIRATION;
-  const result = await prisma.emailVerification.create({
-    data: {
-      token,
-      expirationDate: new Date(Date.now() + expiration * 1000),
-      user: {
-        connect: { userId },
-      },
-    },
-  });
 
   const transporter = nodemailer.createTransport({
     service: "Gmail",
@@ -137,10 +136,22 @@ export const saveAndSendToken = async (userId, next) => {
 
   await transporter.sendMail({
     from: `"YoChat" <${process.env.EMAIL_USER}>`,
-    to: email,
+    to: user.email,
     subject: "Email Verification",
-    html: `<p>Copy and paste the following token to verify your email: <b>${result.token}</b></p>`,
+    html: `<p>Copy and paste the following token to verify your email: <b>${token}</b></p>`,
   });
+
+  const expiration = process.env.EMAIL_VERIFICATION_EXPIRATION;
+  await prisma.emailVerification.create({
+    data: {
+      token,
+      expirationDate: new Date(Date.now() + expiration * 1000),
+      user: {
+        connect: { userId: user.userId },
+      },
+    },
+  });
+  return cb(false);
 };
 
 export const logout = (req, res, next) => {
@@ -208,26 +219,24 @@ export const verifyEmail = async (req, res, next) => {
 
 export const updateProfile = async (req, res, next) => {
   try {
-    const { username, fullName, profilePicture } = req.body;
+    const { username, fullName } = req.body;
     const { userId } = req.user;
 
     const existingUsername = await prisma.user.findUnique({
       select: { userId: true },
       where: { username },
     });
-    if (existingUsername) {
+    if (existingUsername && existingUsername.userId !== userId) {
       const err = new Error("Username already in use");
       err.status = 409;
       next(err);
     }
 
-    const uploadResponse = await cloudinary.uploader.upload(profilePicture);
     const result = await prisma.user.update({
       where: { userId },
       data: {
         username,
         fullName,
-        profilePicture: uploadResponse.secure_url,
       },
     });
 
@@ -236,7 +245,6 @@ export const updateProfile = async (req, res, next) => {
       data: {
         username: result.username,
         fullName: result.fullName,
-        profilePicture: result.profilePicture,
       },
     });
   } catch (error) {
@@ -245,6 +253,43 @@ export const updateProfile = async (req, res, next) => {
   }
 };
 
+export const updateProfilePic = async (req, res, next) => {
+  try {
+    const { profilePicture } = req.body;
+    const { userId } = req.user;
+
+    let newProfilePic = "";
+
+    if (profilePicture) {
+      const uploadResponse = await cloudinary.uploader.upload(profilePicture);
+      newProfilePic = uploadResponse.secure_url;
+    }
+
+    const result = await prisma.user.update({
+      where: { userId },
+      data: {
+        profilePicture: newProfilePic,
+      },
+    });
+
+    res.status(200).json({
+      message: "Profile picture successfully updated",
+      data: {
+        profilePicture: result.profilePicture,
+      },
+    });
+  } catch (error) {
+    console.error("Error in updateProfilePic function: ", error);
+    next(error);
+  }
+};
+
 export const checkAuth = (req, res, next) => {
-  res.status(200).json(req.user);
+  const { user } = req;
+  res.status(200).json({
+    username: user.username,
+    email: user.email,
+    fullName: user.fullName,
+    profilePicture: user.profilePicture,
+  });
 };

@@ -8,7 +8,7 @@ export const signupValidator = [
 ];
 
 export const loginValidator = [
-  body("email").isEmail().withMessage("Invalid Email").notEmpty().withMessage("Email required"),
+  body("username").isString().withMessage("Username must be string").notEmpty().withMessage("Username required"),
   body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters long").notEmpty().withMessage("Password required"),
 ];
 
@@ -19,9 +19,14 @@ export const verifyEmailValidator = [query("token").notEmpty().withMessage("Toke
 export const updateProfileValidator = [
   body("username").isString().withMessage("Username must be string").notEmpty().withMessage("Username required"),
   body("fullName").isString().withMessage("Full name must be string").notEmpty().withMessage("Full name required"),
-  body("profilePicture")
-    .notEmpty()
-    .withMessage("Image is required")
-    .matches(/^data:image\/(png|jpeg|jpg);base64,/)
-    .withMessage("Image must be base64 string with proper mime type (jpeg/png)"),
+];
+export const updateProfilePicValidator = [
+  body("profilePicture").custom((value) => {
+    if (value === "") return true;
+    const base64Pattern = /^data:image\/(png|jpeg|jpg);base64,/;
+    if (!base64Pattern.test(value)) {
+      throw new Error("Image must be base64 string with proper mime type (jpeg/png)");
+    }
+    return true;
+  }),
 ];
