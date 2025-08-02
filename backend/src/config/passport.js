@@ -26,7 +26,7 @@ passport.use(
           }
         });
       } else {
-        return cb(null, false, { status: 404, message: "User not found" });
+        return cb(null, false, { status: 401, message: "Invalid credentials" });
       }
     } catch (error) {
       console.error("Error in local strategy: ", error);

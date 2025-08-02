@@ -7,14 +7,14 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+      - "5433:5432"
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT}"
+      - "8000:8000"
     depends_on:
       - postgres
     env_file:
