@@ -58,11 +58,12 @@ model EmailVerification {
 }
 
 model UserChatRoom {
-  userChatRoomId String @id @default(uuid()) @map("user_chat_room_id") @db.VarChar(50)
   userId     String   @map("user_id") @db.VarChar(50)
   chatRoomId String   @map("chat_room_id") @db.VarChar(50)
   chatRoom   ChatRoom @relation("ChatRoomUserChatRoom", fields: [chatRoomId], references: [chatRoomId])
   user       User     @relation("UserUserChatRoom", fields: [userId], references: [userId])
 
+  @@id([userId, chatRoomId])
+  
   @@map("user_chat_room")
 }
