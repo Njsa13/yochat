@@ -3,6 +3,7 @@ import cors from "cors";
 import session from "express-session";
 
 import authRouter from "./routes/authRoutes.js";
+import messageRouter from "./routes/messageRoutes.js";
 import errorHandler from "./middlewares/errorHandler.js";
 import passport from "./config/passport.js";
 
@@ -26,6 +27,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/api/auth", authRouter);
+app.use("/api/message", messageRouter);
 
 app.use(errorHandler);
 
