@@ -25,10 +25,14 @@ model User {
 }
 
 model ChatRoom {
-  chatRoomId    String    @id @default(uuid()) @map("chat_room_id") @db.VarChar(50)
-  createdAt     DateTime  @default(now()) @map("created_at")
-  messages      Message[] @relation("ChatRoomMessages")
-  userChatRoom  UserChatRoom[] @relation("ChatRoomUserChatRoom")
+  chatRoomId      String    @id @default(uuid()) @map("chat_room_id") @db.VarChar(50)
+  latestMessage   String?
+  latestMessageAt DateTime?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  messages        Message[] @relation("ChatRoomMessages")
+  userChatRoom    UserChatRoom[] @relation("ChatRoomUserChatRoom")
+
+  @@unique([latestMessageAt, chatRoomId], name: "latestMessageAt_chatRoomId")
 
   @@map("chat_room")
 }
@@ -42,6 +46,8 @@ model Message {
   chatRoomId String   @map("chat_room_id") @db.VarChar(50)
   chatRoom   ChatRoom @relation("ChatRoomMessages", fields: [chatRoomId], references: [chatRoomId])
   user       User     @relation("UserMessages", fields: [userId], references: [userId])
+
+  @@unique([createdAt, messageId], name: "createdAt_messageId")
 
   @@map("messages")
 }
@@ -60,6 +66,7 @@ model EmailVerification {
 model UserChatRoom {
   userId     String   @map("user_id") @db.VarChar(50)
   chatRoomId String   @map("chat_room_id") @db.VarChar(50)
+  createdAt  DateTime @default(now()) @map("created_at")
   chatRoom   ChatRoom @relation("ChatRoomUserChatRoom", fields: [chatRoomId], references: [chatRoomId])
   user       User     @relation("UserUserChatRoom", fields: [userId], references: [userId])
 
