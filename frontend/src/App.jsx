@@ -1,10 +1,22 @@
+import { useSelector } from "react-redux";
+import { Routes, Route } from "react-router-dom";
+
 import Navbar from "./components/Navbar.jsx";
+import HomePage from "./pages/HomePage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import SignUpPage from "./pages/SignupPage.jsx";
 
 function App() {
+  const theme = useSelector((state) => state.theme.theme);
+
   return (
-    <div data-theme={"dark"}>
+    <div data-theme={theme} className="font-lato">
       <Navbar />
-      
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+      </Routes>
     </div>
   );
 }
