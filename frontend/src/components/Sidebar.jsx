@@ -14,9 +14,9 @@ function Sidebar() {
           <button className="badge badge-outline border-base-content/20 text-base-content/50 py-4 rounded-xl hover:bg-base-content/20 transition-colors duration-300">Unread</button>
         </div>
       </div>
-      <div className="flex flex-col pr-5 overflow-y-auto">
-        <button>
-          <div className="user-card pl-5 bg-base-300 py-4 flex gap-6">
+      <div className="flex flex-col pr-5 overflow-y-auto gap-2">
+        <button className="bg-base-content/10 transition-colors duration-300 rounded-tr-lg rounded-br-lg">
+          <div className="user-card pl-5 py-4 flex gap-6">
             <div className="avatar avatar-online">
               <div className="w-13 rounded-full">
                 <img src="/avatar.png" />
@@ -28,59 +28,7 @@ function Sidebar() {
             </div>
           </div>
         </button>
-        <button>
-          <div className="user-card pl-5 py-4 flex gap-6">
-            <div className="avatar">
-              <div className="w-13 rounded-full">
-                <img src="/avatar.png" />
-              </div>
-            </div>
-            <div className="flex flex-col justify-center text-left">
-              <h2 className="font-roboto text-lg font-medium text-base-content">Jane Dea</h2>
-              <p className="text-base-content/50">Pesan Terbaru</p>
-            </div>
-          </div>
-        </button>
-        <button>
-          <div className="user-card pl-5 py-4 flex gap-6">
-            <div className="avatar">
-              <div className="w-13 rounded-full">
-                <img src="/avatar.png" />
-              </div>
-            </div>
-            <div className="flex flex-col justify-center text-left">
-              <h2 className="font-roboto text-lg font-medium text-base-content">Jane Dea</h2>
-              <p className="text-base-content/50">Pesan Terbaru</p>
-            </div>
-          </div>
-        </button>
-        <button>
-          <div className="user-card pl-5 py-4 flex gap-6">
-            <div className="avatar">
-              <div className="w-13 rounded-full">
-                <img src="/avatar.png" />
-              </div>
-            </div>
-            <div className="flex flex-col justify-center text-left">
-              <h2 className="font-roboto text-lg font-medium text-base-content">Jane Dea</h2>
-              <p className="text-base-content/50">Pesan Terbaru</p>
-            </div>
-          </div>
-        </button>
-        <button>
-          <div className="user-card pl-5 py-4 flex gap-6">
-            <div className="avatar">
-              <div className="w-13 rounded-full">
-                <img src="/avatar.png" />
-              </div>
-            </div>
-            <div className="flex flex-col justify-center text-left">
-              <h2 className="font-roboto text-lg font-medium text-base-content">Jane Dea</h2>
-              <p className="text-base-content/50">Pesan Terbaru</p>
-            </div>
-          </div>
-        </button>
-        <button>
+        <button className="hover:bg-base-content/10 transition-colors duration-300 rounded-tr-lg rounded-br-lg">
           <div className="user-card pl-5 py-4 flex gap-6">
             <div className="avatar">
               <div className="w-13 rounded-full">

@@ -15,7 +15,7 @@ function ChatHeader() {
         </div>
       </div>
       <div className="flex items-center">
-        <button>
+        <button className="text-[#8A8C8E] hover:text-base-content transition-colors duration-300">
           <X />
         </button>
       </div>
