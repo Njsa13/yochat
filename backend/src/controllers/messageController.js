@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 import cloudinary from "../config/cloudinary.js";
 import prisma from "../prisma/client.js";
 
@@ -206,15 +208,17 @@ export const sendMessage = async (req, res, next) => {
     }
 
     let chatRoom = (
-      await prisma.$queryRaw`
-      select c.chat_room_id 
-      from chat_room c
-      join user_chat_room uc 
-      on c.chat_room_id = uc.chat_room_id
-      where uc.user_id in (${userId}, ${chatPartner.userId})
-      group by c.chat_room_id
-      having count(distinct uc.user_id) = 2
-    `
+      await prisma.$queryRaw(
+        Prisma.sql`
+          select c.chat_room_id 
+          from chat_room c
+          join user_chat_room uc 
+          on c.chat_room_id = uc.chat_room_id
+          where uc.user_id in (${Prisma.join([userId, chatPartner.userId])})
+          group by c.chat_room_id
+          having count(distinct uc.user_id) = 2
+        `
+      )
     )[0];
 
     if (!chatRoom) {
