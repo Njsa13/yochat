@@ -138,7 +138,12 @@ export const saveAndSendToken = async (user, cb) => {
     from: `"YoChat" <${process.env.EMAIL_USER}>`,
     to: user.email,
     subject: "Email Verification",
-    html: `<p>Copy and paste the following token to verify your email: <b>${token}</b></p>`,
+    html: `
+    <p>
+      Thank you for signing up! Please verify your email address by clicking the link below: <br>
+      <a href="http://localhost:5173/verify-email?${token}">Verify Email</a> or copy and paste this URL into your browser: <br>
+      <b>http://localhost:5173/verify-email?${token}</b>
+    </p>`,
   });
 
   const expiration = process.env.EMAIL_VERIFICATION_EXPIRATION;
