@@ -8,7 +8,7 @@ function Navbar() {
   const dispatch = useDispatch();
 
   return (
-    <header className="bg-base-100 fixed w-full border-b border-base-content/10">
+    <header className="bg-base-100 fixed z-10 w-full border-b border-base-content/10">
       <div className="container mx-auto p-4">
         <div className="flex justify-between">
           <div className="flex">

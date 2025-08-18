@@ -4,7 +4,7 @@ import AuthPageLogo from "../components/AuthPageLogo.jsx";
 
 function SignUpPage() {
   return (
-    <div className="bg-base-100 grid lg:grid-cols-2">
+    <div className="bg-base-100 grid grid-cols-1 lg:grid-cols-2">
       <div className="flex flex-col mt-12 items-center justify-center px-6 py-12 sm:px-30 gap-6">
         <div className="head flex flex-col items-center gap-2">
           <h1 className="font-roboto font-semibold text-2xl text-base-content">Join Now</h1>
