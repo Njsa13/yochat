@@ -147,8 +147,8 @@ export const saveAndSendToken = async (user, cb) => {
     html: `
     <p>
       Thank you for signing up! Please verify your email address by clicking the link below: <br>
-      <a href="http://localhost:5173/verify-email?${token}">Verify Email</a> or copy and paste this URL into your browser: <br>
-      <b>http://localhost:5173/verify-email?${token}</b>
+      <a href="http://localhost:5173/verify-email?token=${token}">Verify Email</a> or copy and paste this URL into your browser: <br>
+      <b>http://localhost:5173/verify-email?token=${token}</b>
     </p>`,
   });
 

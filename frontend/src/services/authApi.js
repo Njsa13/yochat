@@ -60,6 +60,20 @@ export const authApi = createApi({
         }
       },
     }),
+    verifyEmail: builder.mutation({
+      query: ({ token }) => ({
+        url: `/api/auth/verify-email?token=${encodeURIComponent(token)}`,
+        method: "PUT",
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setCredentials(data?.data));
+        } catch (error) {
+          toastErrorHandler(error.error, "Failed to verify email");
+        }
+      },
+    }),
     checkAuth: builder.query({
       query: () => "/api/auth/check-auth",
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -82,5 +96,6 @@ export const {
   useRegisterMutation,
   useLogoutQuery,
   useSendEmailVerificationMutation,
+  useVerifyEmailMutation,
   useCheckAuthQuery,
 } = authApi;
