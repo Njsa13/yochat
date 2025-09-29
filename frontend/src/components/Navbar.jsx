@@ -12,7 +12,7 @@ function Navbar() {
       <div className="container mx-auto p-4">
         <div className="flex justify-between">
           <div className="flex">
-            <a href="" className="flex gap-2 items-center">
+            <a href="/" className="flex gap-2 items-center">
               <div className="logo">
                 <MessagesSquare size={30} className="text-secondary" />
               </div>
@@ -20,10 +20,18 @@ function Navbar() {
             </a>
           </div>
           <div className="flex gap-10">
-            <button aria-label="Theme toggle" onClick={() => dispatch(changeTheme())} className="w-8 rounded-full p-1 transition-opacity duration-300 opacity-50 hover:opacity-100">
+            <button
+              aria-label="Theme toggle"
+              onClick={() => dispatch(changeTheme())}
+              className="w-8 rounded-full p-1 transition-opacity duration-300 opacity-50 hover:opacity-100"
+            >
               {theme === "light" ? <Sun /> : <Moon />}
             </button>
-            <a href="" className="w-9 rounded-full p-1 transition-color duration-300 hover:bg-base-content/20 tooltip tooltip-bottom" data-tip="najibsauqi12">
+            <a
+              href=""
+              className="w-9 rounded-full p-1 transition-color duration-300 hover:bg-base-content/20 tooltip tooltip-bottom"
+              data-tip="najibsauqi12"
+            >
               <div className="avatar">
                 <div className="rounded-full">
                   <img src="/avatar.png" />

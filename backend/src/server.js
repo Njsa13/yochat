@@ -10,6 +10,14 @@ import passport from "./config/passport.js";
 const app = e();
 const PORT = process.env.BACKEND_PORT;
 
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 app.use(e.json({ limit: "50mb" }));
 app.use(
   session({

@@ -10,10 +10,14 @@ passport.use(
   new Strategy(async function verify(username, password, cb) {
     try {
       const result = await prisma.user.findUnique({
-        where: { username },
+        where: { email: username },
       });
       if (result) {
-        if (!result.isEmailVerified) return cb(null, false, { status: 403, message: "Email not verified" });
+        if (!result.isEmailVerified)
+          return cb(null, false, {
+            status: 403,
+            message: "Email not verified",
+          });
         bcrypt.compare(password, result.password, (error, valid) => {
           if (error) {
             throw error;
@@ -21,7 +25,10 @@ passport.use(
             if (valid) {
               return cb(null, result);
             } else {
-              return cb(null, false, { status: 401, message: "Invalid credentials" });
+              return cb(null, false, {
+                status: 401,
+                message: "Invalid credentials",
+              });
             }
           }
         });

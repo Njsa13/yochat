@@ -1,22 +1,44 @@
 import { useSearchParams } from "react-router-dom";
+import { useSendEmailVerificationMutation } from "../services/authApi";
 
 function SendVerificationEmail() {
   const [searchParams] = useSearchParams();
   const email = searchParams.get("email");
+  const [sendEmailVerification, { isLoading }] =
+    useSendEmailVerificationMutation();
+
+  const sendHandler = async () => {
+    await sendEmailVerification({ email });
+  };
 
   return (
     <div className="bg-base-300 h-screen">
       <div className="flex flex-col items-center h-full pt-[68px] justify-center">
         <div className="bg-base-100 p-8 rounded-xl shadow-md text-center flex flex-col items-center gap-3">
-          <h1 className="text-base-content/80 font-semibold text-xl font-roboto">Email Verification</h1>
+          <h1 className="text-base-content/80 font-semibold text-xl font-roboto">
+            Email Verification
+          </h1>
           <div>
             <p className="text-base-content/50">
-              Email successfully sent to <span className="font-semibold text-base-content/80">{email || "your.email@mail.com"}</span>
+              Email successfully sent to{" "}
+              <span className="font-semibold text-base-content/80">
+                {email || "your.email@mail.com"}
+              </span>
             </p>
-            <p className="text-base-content/50">Please check your email to verify</p>
+            <p className="text-base-content/50">
+              Please check your email to verify
+            </p>
           </div>
-          <button className="text-primary underline hover:opacity-80 transition-opacity duration-300" disabled={!email}>
-            Send again
+          <button
+            className={`text-primary ${
+              !isLoading && email
+                ? "underline hover:opacity-80 transition-opacity duration-300"
+                : "opacity-80"
+            }`}
+            disabled={!email || isLoading}
+            onClick={sendHandler}
+          >
+            {isLoading ? "Loading..." : "Send again"}
           </button>
         </div>
       </div>

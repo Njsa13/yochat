@@ -26,6 +26,7 @@ export const login = (req, res, next) => {
           username: result.username,
           email: result.email,
           fullName: result.fullName,
+          profilePicture: result.profilePicture,
         },
       });
     });
@@ -71,6 +72,7 @@ export const signup = async (req, res, next) => {
               username: result.username,
               email: result.email,
               fullName: result.fullName,
+              profilePicture: result.profilePicture,
             },
           });
         });
@@ -84,10 +86,10 @@ export const signup = async (req, res, next) => {
 
 export const sendVerificationEmail = async (req, res, next) => {
   try {
-    const { username } = req.query;
+    const { email } = req.query;
     const user = await prisma.user.findUnique({
       select: { userId: true, isEmailVerified: true, email: true },
-      where: { username },
+      where: { email },
     });
     if (!user) {
       const err = new Error("User not found");
@@ -118,8 +120,12 @@ export const saveAndSendToken = async (user, cb) => {
   });
 
   if (unexpiredToken) {
-    const timeRemaining = Math.floor((unexpiredToken.expirationDate - new Date()) / 1000);
-    const err = new Error(`Please wait ${timeRemaining} seconds before trying again`);
+    const timeRemaining = Math.floor(
+      (unexpiredToken.expirationDate - new Date()) / 1000
+    );
+    const err = new Error(
+      `Please wait ${timeRemaining} seconds before trying again`
+    );
     err.status = 429;
     return cb(err);
   }
@@ -292,9 +298,11 @@ export const updateProfilePic = async (req, res, next) => {
 export const checkAuth = (req, res, next) => {
   const { user } = req;
   res.status(200).json({
-    username: user.username,
-    email: user.email,
-    fullName: user.fullName,
-    profilePicture: user.profilePicture,
+    data: {
+      username: user.username,
+      email: user.email,
+      fullName: user.fullName,
+      profilePicture: user.profilePicture,
+    },
   });
 };
