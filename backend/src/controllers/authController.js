@@ -1,10 +1,9 @@
 import passport from "passport";
 import bcrypt from "bcrypt";
-import { v4 } from "uuid";
-import nodemailer from "nodemailer";
 
 import prisma from "../prisma/client.js";
 import cloudinary from "../config/cloudinary.js";
+import { saveAndSendToken } from "../utils/sendEmailVerifUtil.js";
 
 export const login = (req, res, next) => {
   passport.authenticate("local", (error, result, info) => {
@@ -64,22 +63,21 @@ export const signup = async (req, res, next) => {
         const result = await prisma.user.create({
           data: { username, email, fullName, password: hashedPassword },
         });
-        saveAndSendToken(result, (error) => {
-          if (error) return next(error);
-          res.status(201).json({
-            message: "New account created successfully",
-            data: {
-              username: result.username,
-              email: result.email,
-              fullName: result.fullName,
-              profilePicture: result.profilePicture,
-            },
-          });
+        await saveAndSendToken(result);
+        res.status(201).json({
+          message: "New account created successfully",
+          data: {
+            username: result.username,
+            email: result.email,
+            fullName: result.fullName,
+            profilePicture: result.profilePicture,
+          },
         });
       }
     });
   } catch (error) {
-    console.error("Error in signup function: ", error);
+    if (error.status === 500)
+      console.error("Error in signup function: ", error);
     next(error);
   }
 };
@@ -101,68 +99,13 @@ export const sendVerificationEmail = async (req, res, next) => {
       err.status = 409;
       return next(err);
     }
-    saveAndSendToken(user, (error) => {
-      if (error) return next(error);
-      res.status(200).json({ message: "Verification email successfully sent" });
-    });
+    await saveAndSendToken(user);
+    res.status(200).json({ message: "Verification email successfully sent" });
   } catch (error) {
-    console.error("Error in sendVerificationEmail function: ", error);
+    if (error.status === 500)
+      console.error("Error in sendVerificationEmail function: ", error);
     next(error);
   }
-};
-
-export const saveAndSendToken = async (user, cb) => {
-  const unexpiredToken = await prisma.emailVerification.findFirst({
-    select: { emailVerificationId: true, expirationDate: true },
-    where: {
-      AND: [{ userId: user.userId }, { expirationDate: { gt: new Date() } }],
-    },
-  });
-
-  if (unexpiredToken) {
-    const timeRemaining = Math.floor(
-      (unexpiredToken.expirationDate - new Date()) / 1000
-    );
-    const err = new Error(
-      `Please wait ${timeRemaining} seconds before trying again`
-    );
-    err.status = 429;
-    return cb(err);
-  }
-
-  const token = v4();
-
-  const transporter = nodemailer.createTransport({
-    service: "Gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
-
-  await transporter.sendMail({
-    from: `"YoChat" <${process.env.EMAIL_USER}>`,
-    to: user.email,
-    subject: "Email Verification",
-    html: `
-    <p>
-      Thank you for signing up! Please verify your email address by clicking the link below: <br>
-      <a href="http://localhost:5173/verify-email?token=${token}">Verify Email</a> or copy and paste this URL into your browser: <br>
-      <b>http://localhost:5173/verify-email?token=${token}</b>
-    </p>`,
-  });
-
-  const expiration = process.env.EMAIL_VERIFICATION_EXPIRATION;
-  await prisma.emailVerification.create({
-    data: {
-      token,
-      expirationDate: new Date(Date.now() + expiration * 1000),
-      user: {
-        connect: { userId: user.userId },
-      },
-    },
-  });
-  return cb(false);
 };
 
 export const logout = (req, res, next) => {

@@ -17,14 +17,6 @@ export const authApi = createApi({
         method: "POST",
         body: credentials,
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setCredentials(data?.data));
-        } catch (error) {
-          toastErrorHandler(error.error, "Login failed");
-        }
-      },
     }),
     register: builder.mutation({
       query: (userData) => ({

@@ -3,8 +3,14 @@ import { Mail, Lock } from "lucide-react";
 import AuthPageLogo from "../components/AuthPageLogo.jsx";
 import { useState } from "react";
 import { useLoginMutation } from "../services/authApi.js";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../store/authSlice.js";
+import { toastErrorHandler } from "../services/handler.js";
 
 function LoginPage() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -13,7 +19,16 @@ function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    await login(formData);
+    try {
+      const result = await login(formData).unwrap();
+      dispatch(setCredentials(result?.data));
+    } catch (error) {
+      if (error.status === 403) {
+        navigate(`/send-verification-email?email=${formData.username}`);
+      } else {
+        toastErrorHandler(error, "Login failed");
+      }
+    }
   };
 
   return (
