@@ -1,21 +1,37 @@
 import { Mail, Lock } from "lucide-react";
 
 import AuthPageLogo from "../components/AuthPageLogo.jsx";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLoginMutation } from "../services/authApi.js";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../store/authSlice.js";
 import { toastErrorHandler } from "../services/handler.js";
 
 function LoginPage() {
   const navigate = useNavigate();
+  const toastShown = useRef(false);
+  const [searchParams] = useSearchParams();
+  const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
   const [login, { isLoading }] = useLoginMutation();
+
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    if (errorParam && !toastShown.current) {
+      const errorObj = JSON.parse(decodeURIComponent(errorParam));
+      toastErrorHandler(
+        { status: errorObj.status, data: { message: errorObj.message } },
+        "Login failed"
+      );
+      toastShown.current = true;
+      navigate(location.pathname, { replace: true });
+    }
+  }, [navigate, searchParams]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -29,6 +45,11 @@ function LoginPage() {
         toastErrorHandler(error, "Login failed");
       }
     }
+  };
+
+  const handleLoginGoogle = () => {
+    setIsLoadingGoogle(true);
+    window.location.href = import.meta.env.VITE_API_URL + "/api/auth/google";
   };
 
   return (
@@ -83,13 +104,19 @@ function LoginPage() {
           <div className="form-control max-w-md lg:min-w-sm w-full">
             <button
               className="font-medium rounded-lg btn btn-primary w-full text-[#212121] font-roboto"
-              disabled={isLoading}
+              disabled={isLoading || !(formData.username && formData.password)}
+              type="submit"
             >
               {isLoading ? "Loading..." : "Login"}
             </button>
           </div>
           <div className="form-control max-w-md lg:min-w-sm w-full">
-            <button className="font-medium rounded-lg btn bg-white hover:bg-[#e0e0e0] text-[#212121] border-black/30 w-full font-roboto">
+            <button
+              type="button"
+              onClick={handleLoginGoogle}
+              disabled={isLoadingGoogle}
+              className="font-medium rounded-lg btn bg-white hover:bg-[#e0e0e0] text-[#212121] border-black/30 w-full font-roboto"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 x="0px"

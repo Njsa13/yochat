@@ -39,7 +39,7 @@ passport.use(
         return cb(null, false, { status: 401, message: "Invalid credentials" });
       }
     } catch (error) {
-      if (error.status !== 500)
+      if (error.status < 500)
         return cb(null, false, {
           status: error.status,
           message: error.message,
@@ -48,6 +48,61 @@ passport.use(
       cb(error);
     }
   })
+);
+
+passport.use(
+  "google",
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.VITE_API_URL + "/api/auth/google/callback",
+      userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
+    },
+    async (accessToken, refreshToken, profile, cb) => {
+      try {
+        const email = profile.emails?.[0]?.value || profile._json?.email;
+        if (!email) {
+          return cb(null, false, {
+            status: 404,
+            message: "Google account does not provide email",
+          });
+        }
+        const result = await prisma.user.findUnique({
+          where: { email },
+        });
+        if (result) {
+          if (result.loginStrategy !== "GOOGLE") {
+            return cb(null, false, {
+              status: 409,
+              message: "Email is already registered using another method",
+            });
+          }
+          return cb(null, result);
+        }
+        const newUser = await prisma.user.create({
+          data: {
+            username: email.split("@")[0],
+            email,
+            fullName:
+              profile.displayName ||
+              `${profile.name?.givenName || ""} ${
+                profile.name?.familyName || ""
+              }`.trim(),
+            password: null,
+            loginStrategy: "GOOGLE",
+            profilePicture:
+              profile.photos?.[0]?.value || profile._json?.picture,
+            isEmailVerified: true,
+          },
+        });
+        return cb(null, newUser);
+      } catch (error) {
+        console.error("Error in google strategy: ", error);
+        cb(error);
+      }
+    }
+  )
 );
 
 passport.serializeUser((user, cb) => {

@@ -8,6 +8,7 @@ import { toastErrorHandler } from "../services/handler.js";
 
 function SignUpPage() {
   const navigate = useNavigate();
+  const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     fullName: "",
@@ -25,6 +26,11 @@ function SignUpPage() {
     } catch (error) {
       toastErrorHandler(error, "Sign up failed");
     }
+  };
+
+  const handleRegisterGoogle = () => {
+    setIsLoadingGoogle(true);
+    window.location.href = import.meta.env.VITE_API_URL + "/api/auth/google";
   };
 
   return (
@@ -117,13 +123,27 @@ function SignUpPage() {
           <div className="form-control max-w-md lg:min-w-sm w-full">
             <button
               className="font-medium rounded-lg btn btn-primary w-full text-[#212121] font-roboto"
-              disabled={isLoading}
+              disabled={
+                isLoading ||
+                !(
+                  formData.username &&
+                  formData.password &&
+                  formData.email &&
+                  formData.fullName
+                )
+              }
+              type="submit"
             >
               {isLoading ? "Loading..." : "Create Account"}
             </button>
           </div>
           <div className="form-control max-w-md lg:min-w-sm w-full">
-            <button className="font-medium rounded-lg btn bg-white hover:bg-[#e0e0e0] text-[#212121] border-black/30 w-full font-roboto">
+            <button
+              onClick={handleRegisterGoogle}
+              disabled={isLoadingGoogle}
+              type="button"
+              className="font-medium rounded-lg btn bg-white hover:bg-[#e0e0e0] text-[#212121] border-black/30 w-full font-roboto"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 x="0px"

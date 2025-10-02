@@ -1,9 +1,9 @@
-import passport from "passport";
 import bcrypt from "bcrypt";
 
 import prisma from "../prisma/client.js";
 import cloudinary from "../config/cloudinary.js";
 import { saveAndSendToken } from "../utils/sendEmailVerifUtil.js";
+import passport from "../config/passport.js";
 
 export const login = (req, res, next) => {
   passport.authenticate("local", (error, result, info) => {
@@ -248,4 +248,42 @@ export const checkAuth = (req, res, next) => {
       profilePicture: user.profilePicture,
     },
   });
+};
+
+export const googleCallback = (req, res, next) => {
+  passport.authenticate("google", (error, result, info) => {
+    if (error || !result) {
+      let errorParam = null;
+      if (error) {
+        errorParam = encodeURIComponent(
+          JSON.stringify({
+            status: error.status || 500,
+            message: (error.status && error.message) || "Internal Server Error",
+          })
+        );
+      }
+      if (info) {
+        errorParam = encodeURIComponent(JSON.stringify(info));
+      }
+      return res.redirect(
+        `${process.env.CLIENT_URL}/login?error=${errorParam}`
+      );
+    }
+
+    req.login(result, (error) => {
+      if (error) {
+        console.error("Error in login with google function: ", error);
+        const errorParam = encodeURIComponent(
+          JSON.stringify({
+            status: error.status || 500,
+            message: (error.status && error.message) || "Internal Server Error",
+          })
+        );
+        return res.redirect(
+          `${process.env.CLIENT_URL}/login?error=${errorParam}`
+        );
+      }
+      return res.redirect(process.env.CLIENT_URL);
+    });
+  })(req, res, next);
 };
