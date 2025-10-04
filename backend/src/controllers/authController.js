@@ -162,6 +162,7 @@ export const verifyEmail = async (req, res, next) => {
           username: result.username,
           email: result.email,
           fullName: result.fullName,
+          profilePicture: result.profilePicture,
         },
       });
     });

@@ -5,6 +5,7 @@ import GoogleStrategy from "passport-google-oauth2";
 
 import prisma from "../prisma/client.js";
 import { saveAndSendToken } from "../utils/sendEmailVerifUtil.js";
+import cloudinary from "./cloudinary.js";
 
 passport.use(
   "local",
@@ -80,6 +81,8 @@ passport.use(
           }
           return cb(null, result);
         }
+        const picture = profile.photos?.[0]?.value || profile._json?.picture;
+        const uploadRes = await cloudinary.uploader.upload(picture);
         const newUser = await prisma.user.create({
           data: {
             username: email.split("@")[0],
@@ -91,8 +94,7 @@ passport.use(
               }`.trim(),
             password: null,
             loginStrategy: "GOOGLE",
-            profilePicture:
-              profile.photos?.[0]?.value || profile._json?.picture,
+            profilePicture: uploadRes.secure_url,
             isEmailVerified: true,
           },
         });
