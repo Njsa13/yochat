@@ -5,6 +5,7 @@ import { changeTheme } from "../store/themeSlice.js";
 
 function Navbar() {
   const theme = useSelector((state) => state.theme.theme);
+  const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
 
   return (
@@ -27,17 +28,22 @@ function Navbar() {
             >
               {theme === "light" ? <Sun /> : <Moon />}
             </button>
-            <a
-              href=""
-              className="w-9 rounded-full p-1 transition-color duration-300 hover:bg-base-content/20 tooltip tooltip-bottom"
-              data-tip="najibsauqi12"
-            >
-              <div className="avatar">
-                <div className="rounded-full">
-                  <img src="/avatar.png" />
+            {user && (
+              <a
+                href=""
+                className="w-9 rounded-full p-1 transition-color duration-300 hover:bg-base-content/20 tooltip tooltip-bottom"
+                data-tip={user?.username || "anonymus"}
+              >
+                <div className="avatar">
+                  <div className="rounded-full">
+                    <img
+                      src={user?.profilePicture || "/avatar.png"}
+                      onError={(e) => (e.currentTarget.src = "/avatar.png")}
+                    />
+                  </div>
                 </div>
-              </div>
-            </a>
+              </a>
+            )}
           </div>
         </div>
       </div>

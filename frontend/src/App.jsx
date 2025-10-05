@@ -14,9 +14,9 @@ import { useCheckAuthQuery } from "./services/authApi.js";
 function App() {
   const theme = useSelector((state) => state.theme.theme);
   const authUser = useSelector((state) => state.auth.user);
-  const { isLoading: isLoadingCheck } = useCheckAuthQuery();
+  const { isLoading } = useCheckAuthQuery();
 
-  if (isLoadingCheck && !authUser)
+  if (isLoading && !authUser)
     return (
       <div
         data-theme={theme}

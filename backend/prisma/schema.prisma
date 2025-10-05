@@ -48,6 +48,7 @@ model Message {
   messageId  String   @id @default(uuid()) @map("message_id") @db.VarChar(50)
   text       String?
   image      String?
+  isRead     Boolean  @default(false) @map("is_read")
   createdAt  DateTime @default(now()) @map("created_at")
   userId     String   @map("user_id") @db.VarChar(50)
   chatRoomId String   @map("chat_room_id") @db.VarChar(50)

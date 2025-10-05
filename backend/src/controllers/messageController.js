@@ -6,7 +6,8 @@ import prisma from "../prisma/client.js";
 export const getContacts = async (req, res, next) => {
   try {
     const { userId } = req.user;
-    const { cursorChatRoomId, cursorLatestMessageAt } = req.query;
+    const { cursorChatRoomId, cursorLatestMessageAt, search, isUnread } =
+      req.query;
 
     const limit = 10;
     const chatRooms = await prisma.chatRoom.findMany({
@@ -22,11 +23,41 @@ export const getContacts = async (req, res, next) => {
           },
         }),
       where: {
-        userChatRoom: {
-          some: {
-            userId: userId,
+        AND: [
+          {
+            userChatRoom: {
+              some: {
+                userId: userId,
+              },
+            },
           },
-        },
+          {
+            ...(search && {
+              userChatRoom: {
+                some: {
+                  userId: { not: userId },
+                  user: {
+                    OR: [
+                      { fullName: { contains: search, mode: "insensitive" } },
+                      { email: { contains: search, mode: "insensitive" } },
+                      { username: { contains: search, mode: "insensitive" } },
+                    ],
+                  },
+                },
+              },
+            }),
+          },
+          {
+            ...(isUnread && {
+              messages: {
+                some: {
+                  userId: { not: userId },
+                  isRead: !isUnread,
+                },
+              },
+            }),
+          },
+        ],
       },
       include: {
         userChatRoom: {
@@ -36,6 +67,16 @@ export const getContacts = async (req, res, next) => {
                 fullName: true,
                 email: true,
                 profilePicture: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            messages: {
+              where: {
+                userId: { not: userId },
+                isRead: false,
               },
             },
           },
@@ -62,6 +103,7 @@ export const getContacts = async (req, res, next) => {
         }))[0],
       latestMessage: val.latestMessage || "No message",
       latestMessageAt: val.latestMessageAt,
+      unread: val._count.messages,
     }));
     const hasNextPage = result.length > limit;
 
