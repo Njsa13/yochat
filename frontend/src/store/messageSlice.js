@@ -20,6 +20,9 @@ const messageSlice = createSlice({
     deleteContacts: (state) => {
       state.contacts = [];
     },
+    deleteSelectedContacts: (state) => {
+      state.selectedContact = null;
+    },
   },
 });
 
@@ -28,5 +31,6 @@ export const {
   setContactsHasNextPage,
   setSelectedContact,
   deleteContacts,
+  deleteSelectedContacts,
 } = messageSlice.actions;
 export default messageSlice.reducer;

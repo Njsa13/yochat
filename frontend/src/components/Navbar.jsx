@@ -2,6 +2,7 @@ import { MessagesSquare, Sun, Moon } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { changeTheme } from "../store/themeSlice.js";
+import { setSelectedContact } from "../store/messageSlice.js";
 
 function Navbar() {
   const theme = useSelector((state) => state.theme.theme);
@@ -29,10 +30,10 @@ function Navbar() {
               {theme === "light" ? <Sun /> : <Moon />}
             </button>
             {user && (
-              <a
-                href=""
+              <button
                 className="w-9 rounded-full p-1 transition-color duration-300 hover:bg-base-content/20 tooltip tooltip-bottom"
                 data-tip={user?.username || "anonymus"}
+                onClick={() => dispatch(setSelectedContact(user))}
               >
                 <div className="avatar">
                   <div className="rounded-full">
@@ -42,7 +43,7 @@ function Navbar() {
                     />
                   </div>
                 </div>
-              </a>
+              </button>
             )}
           </div>
         </div>

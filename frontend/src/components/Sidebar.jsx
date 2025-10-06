@@ -17,6 +17,7 @@ function Sidebar() {
     (state) => state.message.contactsHasNextPage
   );
   const selectedContact = useSelector((state) => state.message.selectedContact);
+  const isProfileOpened = useSelector((state) => state.message.isProfileOpened);
 
   const selectedFilterCss =
     "badge bg-accent/40 border-base-content/20 text-base-content/50 py-4 rounded-xl";
@@ -61,7 +62,11 @@ function Sidebar() {
   };
 
   return (
-    <div className="flex flex-col gap-4 pt-[80px] border-r border-base-content/10 overflow-auto">
+    <div
+      className={`${
+        selectedContact || isProfileOpened ? "hidden lg:" : ""
+      }flex flex-col gap-4 pt-[80px] border-r border-base-content/10 overflow-auto`}
+    >
       <div className="px-5 flex flex-col gap-3">
         <h1 className="font-roboto font-semibold text-xl text-base-content">
           Friends
@@ -121,9 +126,9 @@ function Sidebar() {
                   (selectedContact?.chatRoomId === contact.chatRoomId
                     ? selectedContactCss
                     : unSelectedContactCss) +
-                  (contacts.length - 1 === index &&
-                    !contactsHasNextPage &&
-                    " mb-3")
+                  (contacts.length - 1 === index && !contactsHasNextPage
+                    ? " mb-3"
+                    : "")
                 }
                 key={contact.chatRoomId}
                 onClick={() => {
