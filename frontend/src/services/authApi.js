@@ -80,6 +80,36 @@ export const authApi = createApi({
         }
       },
     }),
+    updateProfile: builder.mutation({
+      query: (userData) => ({
+        url: "/api/auth/update-profile",
+        method: "PUT",
+        body: userData,
+      }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          toast.success("200: " + data?.message);
+        } catch (error) {
+          toastErrorHandler(error.error, "Failed to update profile");
+        }
+      },
+    }),
+    updateProfilePic: builder.mutation({
+      query: (picture) => ({
+        url: "/api/auth/update-profile-pic",
+        method: "PUT",
+        body: picture,
+      }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          toast.success("200: " + data?.message);
+        } catch (error) {
+          toastErrorHandler(error.error, "Failed to update profile picture");
+        }
+      },
+    }),
   }),
 });
 
@@ -90,4 +120,6 @@ export const {
   useSendEmailVerificationMutation,
   useVerifyEmailMutation,
   useCheckAuthQuery,
+  useUpdateProfileMutation,
+  useUpdateProfilePicMutation,
 } = authApi;
