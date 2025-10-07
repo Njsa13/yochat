@@ -145,11 +145,11 @@ function Sidebar() {
                       />
                     </div>
                   </div>
-                  <div className="flex flex-col justify-center text-left">
-                    <h2 className="font-roboto text-lg font-medium text-base-content">
+                  <div className="flex flex-col justify-center text-left min-w-0 max-w-full">
+                    <h2 className="font-roboto text-lg font-medium text-base-content truncate">
                       {contact.partnerChat?.fullName || "Anonymus"}
                     </h2>
-                    <p className="text-base-content/50">
+                    <p className="text-base-content/50 truncate">
                       {contact.latestMessage}
                     </p>
                   </div>
