@@ -170,7 +170,7 @@ export const getMessages = async (req, res, next) => {
       return next(err);
     }
 
-    const limit = 10;
+    const limit = 15;
     const messages = await prisma.message.findMany({
       take: limit + 1,
       ...(cursorMessageId &&
@@ -205,13 +205,13 @@ export const getMessages = async (req, res, next) => {
       messageId: val.messageId,
       senderEmail: val.user.email,
       text: val.text,
-      Image: val.image,
+      image: val.image,
       sentAt: val.createdAt,
     }));
     const hasNextPage = result.length > limit;
 
     res.status(200).json({
-      data: result,
+      data: result.slice(0, limit),
       hasNextPage,
     });
   } catch (error) {

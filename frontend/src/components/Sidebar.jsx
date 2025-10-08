@@ -11,7 +11,7 @@ function Sidebar() {
   const [filter, setFilter] = useState("ALL");
   const [isLoading, setIsLoading] = useState(true);
   const dispatch = useDispatch();
-  const [triggerContacts] = useLazyGetContactsQuery();
+  const [triggerGetContacts] = useLazyGetContactsQuery();
   const contacts = useSelector((state) => state.message.contacts);
   const contactsHasNextPage = useSelector(
     (state) => state.message.contactsHasNextPage
@@ -36,18 +36,18 @@ function Sidebar() {
     };
     setIsLoading(true);
     if (!search) {
-      triggerContacts({ params: filterObj, reset: true })
+      triggerGetContacts({ params: filterObj, reset: true })
         .unwrap()
         .finally(() => setIsLoading(false));
     } else {
       const handler = setTimeout(() => {
-        triggerContacts({ params: filterObj, reset: true })
+        triggerGetContacts({ params: filterObj, reset: true })
           .unwrap()
           .finally(() => setIsLoading(false));
       }, 800);
       return () => clearTimeout(handler);
     }
-  }, [filter, search, triggerContacts]);
+  }, [filter, search, triggerGetContacts]);
 
   const getMoreContacts = async () => {
     const filterObj = {
@@ -58,7 +58,7 @@ function Sidebar() {
         cursorLatestMessageAt: contacts[contacts.length - 1].latestMessageAt,
       }),
     };
-    triggerContacts({ params: filterObj, reset: false });
+    triggerGetContacts({ params: filterObj, reset: false });
   };
 
   return (
@@ -110,9 +110,9 @@ function Sidebar() {
       {isLoading ? (
         <SidebarSkeleton loop={8} />
       ) : contacts.length !== 0 ? (
-        <div id="sidebar-scroll" className="overflow-auto">
+        <div id="sidebar-scroll" className="overflow-y-auto">
           <InfiniteScroll
-            className="flex flex-col pr-5 overflow-y-auto gap-2"
+            className="flex flex-col pr-5 gap-2"
             dataLength={contacts.length}
             next={getMoreContacts}
             hasMore={contactsHasNextPage}
