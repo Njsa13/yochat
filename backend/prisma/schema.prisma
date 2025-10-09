@@ -35,6 +35,7 @@ model ChatRoom {
   chatRoomId      String    @id @default(uuid()) @map("chat_room_id") @db.VarChar(50)
   latestMessage   String?
   latestMessageAt DateTime?
+  isTherePicture  Boolean   @default(false) @map("is_there_picture")
   createdAt       DateTime  @default(now()) @map("created_at")
   messages        Message[] @relation("ChatRoomMessages")
   userChatRoom    UserChatRoom[] @relation("ChatRoomUserChatRoom")
