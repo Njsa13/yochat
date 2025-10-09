@@ -102,6 +102,7 @@ export const getContacts = async (req, res, next) => {
           profilePicture: val.user.profilePicture,
         }))[0],
       latestMessage: val.latestMessage || "No message",
+      isTherePicture: val.isTherePicture,
       latestMessageAt: val.latestMessageAt,
       unread: val._count.messages,
     }));
@@ -266,7 +267,8 @@ export const sendMessage = async (req, res, next) => {
     if (!chatRoom) {
       chatRoom = await prisma.chatRoom.create({
         data: {
-          latestMessage: text || (image ? "Image" : ""),
+          latestMessage: text || "",
+          isTherePicture: Boolean(image),
           latestMessageAt: new Date(),
         },
       });
@@ -280,7 +282,8 @@ export const sendMessage = async (req, res, next) => {
       chatRoom = await prisma.chatRoom.update({
         where: { chatRoomId: chatRoom.chat_room_id },
         data: {
-          latestMessage: text || (image ? "Image" : ""),
+          latestMessage: text || "",
+          isTherePicture: Boolean(image),
           latestMessageAt: new Date(),
         },
       });

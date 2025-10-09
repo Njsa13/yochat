@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search, Image } from "lucide-react";
 import { useLazyGetContactsQuery } from "../services/messageApi.js";
 import { useEffect, useState } from "react";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton.jsx";
@@ -150,6 +150,12 @@ function Sidebar() {
                       {contact.partnerChat?.fullName || "Anonymus"}
                     </h2>
                     <p className="text-base-content/50 truncate">
+                      {contact.isTherePicture ? (
+                        <Image className="inline" color="#848f9a" size={20} />
+                      ) : (
+                        ""
+                      )}
+                      {"  "}
                       {contact.latestMessage}
                     </p>
                   </div>
