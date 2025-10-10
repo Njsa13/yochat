@@ -307,9 +307,11 @@ export const sendMessage = async (req, res, next) => {
     res.status(200).json({
       message: "Message successfully sent",
       data: {
+        messageId: message.messageId,
+        senderEmail: req.user.email,
         text: message.text,
         image: message.image,
-        chatRoomId: message.chatRoomId,
+        sentAt: message.createdAt,
       },
     });
   } catch (error) {
