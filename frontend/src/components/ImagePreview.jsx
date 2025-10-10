@@ -2,7 +2,11 @@ import { X } from "lucide-react";
 
 function ImagePreview(props) {
   return (
-    <div className="messages-container flex-1 p-5 flex flex-col overflow-y-auto gap-4">
+    <div
+      className={`${
+        props.imagePreview ? "flex" : "hidden"
+      } flex-1 p-5 flex-col overflow-y-auto gap-4 messages-container`}
+    >
       <div className="flex">
         <button
           className="text-[#8A8C8E] hover:text-base-content transition-colors duration-300"

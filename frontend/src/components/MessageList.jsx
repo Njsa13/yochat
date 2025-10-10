@@ -5,7 +5,7 @@ import { useLazyGetMessagesQuery } from "../services/messageApi";
 import InfiniteScroll from "react-infinite-scroll-component";
 import ChatSkeleton from "./skeletons/ChatSkeleton";
 
-function MessageList() {
+function MessageList(props) {
   const authUser = useSelector((state) => state.auth.user);
   const messages = useSelector((state) => state.message.messages);
   const selectedContact = useSelector((state) => state.message.selectedContact);
@@ -44,7 +44,9 @@ function MessageList() {
   return (
     <div
       id="chat-scroll"
-      className="overflow-y-auto flex-1 flex flex-col-reverse"
+      className={`${
+        props.imagePreview ? "hidden" : "flex"
+      } overflow-y-auto flex-1 flex-col-reverse`}
     >
       <InfiniteScroll
         className="messages-container p-5 flex flex-col-reverse"

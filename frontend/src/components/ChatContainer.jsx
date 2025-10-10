@@ -22,15 +22,12 @@ function ChatContainer() {
       }flex flex-col col-span-2 bg-base-300 justify-between overflow-auto`}
     >
       <ChatHeader />
-      {imagePreview ? (
-        <ImagePreview
-          imagePreview={imagePreview}
-          setImagePreview={setImagePreview}
-          imageRef={imageRef}
-        />
-      ) : (
-        <MessageList />
-      )}
+      <ImagePreview
+        imagePreview={imagePreview}
+        setImagePreview={setImagePreview}
+        imageRef={imageRef}
+      />
+      <MessageList imagePreview={imagePreview} />
       <MessageInput
         imagePreview={imagePreview}
         setImagePreview={setImagePreview}
