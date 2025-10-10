@@ -65,6 +65,40 @@ export const messageApi = createApi({
         }
       },
     }),
+    sendMessage: builder.mutation({
+      query: ({ message, sendTo }) => ({
+        url: `/api/message/send/${sendTo}`,
+        method: "POST",
+        body: message,
+      }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        try {
+          const { message, data } = await queryFulfilled;
+          dispatch(setMessages([data.data, ...getState().message.messages]));
+          const contackData = getState().message.contacts.find(
+            (val) => val.partnerChat?.email === arg.sendTo
+          );
+          dispatch(
+            setContacts([
+              {
+                ...contackData,
+                latestMessage: arg.message?.text,
+                isTherePicture: Boolean(arg.message?.image),
+              },
+              ...getState().message.contacts.filter(
+                (val) => val.partnerChat?.email !== arg.sendTo
+              ),
+            ])
+          );
+          console.log("200: " + message);
+        } catch (error) {
+          console.error(error);
+          const status = error.error?.status || 500;
+          const msg = error.error?.data?.error || "Failed to send message";
+          console.error(`Error ${status}: ${msg}`);
+        }
+      },
+    }),
   }),
 });
 
@@ -73,4 +107,5 @@ export const {
   useLazyGetContactsQuery,
   useGetMessagesQuery,
   useLazyGetMessagesQuery,
+  useSendMessageMutation,
 } = messageApi;
