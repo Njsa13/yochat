@@ -123,9 +123,15 @@ export const getSingleContact = async (req, res, next) => {
     const { email } = req.params;
     const { userId } = req.user;
 
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const user = await prisma.user.findFirst({
+      where: { email, isEmailVerified: true },
     });
+
+    if (!user || !user.isEmailVerified) {
+      const err = new Error("User not found");
+      err.status = 404;
+      return next(err);
+    }
 
     if (userId === user.userId) {
       const err = new Error("Cannot chat with yourself");
@@ -133,16 +139,43 @@ export const getSingleContact = async (req, res, next) => {
       return next(err);
     }
 
-    if (!user || !user.isEmailVerified) {
-      const err = new Error("User not found");
-      err.status = 404;
-      next(err);
+    const chatRoom = await prisma.chatRoom.findFirst({
+      where: {
+        AND: [
+          {
+            userChatRoom: { some: { userId } },
+          },
+          {
+            userChatRoom: { some: { userId: user.userId } },
+          },
+        ],
+      },
+    });
+
+    let data = null;
+
+    if (chatRoom) {
+      data = {
+        chatRoomId: chatRoom.chatRoomId,
+        partnerChat: {
+          fullName: user.fullName,
+          email: user.email,
+          profilePicture: user.profilePicture,
+        },
+      };
+    } else {
+      data = {
+        chatRoomId: null,
+        partnerChat: {
+          fullName: user.fullName,
+          email: user.email,
+          profilePicture: user.profilePicture,
+        },
+      };
     }
 
     res.status(200).json({
-      fullName: user.fullName,
-      email: user.email,
-      profilePicture: user.profilePicture,
+      data,
     });
   } catch (error) {
     console.error("Error in getSingleContact function: ", error);
@@ -264,6 +297,8 @@ export const sendMessage = async (req, res, next) => {
       )
     )[0];
 
+    let unread = 0;
+
     if (!chatRoom) {
       chatRoom = await prisma.chatRoom.create({
         data: {
@@ -285,6 +320,14 @@ export const sendMessage = async (req, res, next) => {
           latestMessage: text || "",
           isTherePicture: Boolean(image),
           latestMessageAt: new Date(),
+        },
+      });
+
+      unread = await prisma.message.count({
+        where: {
+          userId: chatPartner.userId,
+          chatRoomId: chatRoom.chatRoomId,
+          isRead: false,
         },
       });
     }
@@ -312,6 +355,7 @@ export const sendMessage = async (req, res, next) => {
         text: message.text,
         image: message.image,
         sentAt: message.createdAt,
+        unread,
       },
     });
   } catch (error) {

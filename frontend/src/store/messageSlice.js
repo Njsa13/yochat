@@ -8,6 +8,7 @@ const messageSlice = createSlice({
     selectedContact: null,
     messages: [],
     messagesHasNextPage: false,
+    isModalOpen: false,
   },
   reducers: {
     setContacts: (state, action) => {
@@ -28,6 +29,9 @@ const messageSlice = createSlice({
     setMessagesHasNextPage: (state, action) => {
       state.messagesHasNextPage = action.payload;
     },
+    setIsModalOpen: (state, action) => {
+      state.isModalOpen = action.payload;
+    },
   },
 });
 
@@ -38,5 +42,6 @@ export const {
   deleteSelectedContacts,
   setMessages,
   setMessagesHasNextPage,
+  setIsModalOpen
 } = messageSlice.actions;
 export default messageSlice.reducer;

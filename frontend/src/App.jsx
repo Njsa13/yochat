@@ -10,10 +10,12 @@ import SignUpPage from "./pages/SignUpPage.jsx";
 import VerifyEmailPage from "./pages/VerifyEmailPage.jsx";
 import SendVerificationEmail from "./pages/SendVerificationEmail.jsx";
 import { useCheckAuthQuery } from "./services/authApi.js";
+import NewMessageModal from "./components/NewMessageModal.jsx";
 
 function App() {
   const theme = useSelector((state) => state.theme.theme);
   const authUser = useSelector((state) => state.auth.user);
+  const isModalOpen = useSelector((state) => state.message.isModalOpen);
   const { isLoading } = useCheckAuthQuery();
 
   if (isLoading && !authUser)
@@ -51,6 +53,7 @@ function App() {
           element={!authUser ? <SendVerificationEmail /> : <Navigate to="/" />}
         />
       </Routes>
+      {isModalOpen && <NewMessageModal />}
       <Toaster />
     </div>
   );

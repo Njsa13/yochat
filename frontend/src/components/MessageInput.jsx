@@ -80,7 +80,7 @@ function MessageInput(props) {
             ref={props.imageRef}
           />
           <button
-            className="btn btn-circle p-1 bg-base-300 hover:bg-base-content/20 border-0"
+            className="btn btn-circle p-1 bg-base-content/10 hover:bg-base-content/30 border-0"
             onClick={(e) => {
               props.imageRef.current?.click();
               e.preventDefault();
@@ -91,13 +91,19 @@ function MessageInput(props) {
         </div>
         <div className="form-control">
           <button
-            className="btn btn-circle p-1 bg-base-300 hover:bg-base-content/20 border-0"
+            className="btn btn-circle p-1 disabled:!bg-base-300 bg-base-content/10 hover:bg-base-content/30 border-0"
             disabled={(!text && !props.imagePreview) || isLoading}
           >
             {isLoading ? (
               <Loader className="text-base-content animate-spin" />
             ) : (
-              <SendHorizontal className="text-base-content" />
+              <SendHorizontal
+                className={`${
+                  (!text && !props.imagePreview) || isLoading
+                    ? "opacity-25"
+                    : ""
+                } text-base-content`}
+              />
             )}
           </button>
         </div>

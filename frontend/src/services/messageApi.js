@@ -2,9 +2,12 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
   setContacts,
   setContactsHasNextPage,
+  setIsModalOpen,
   setMessages,
   setMessagesHasNextPage,
+  setSelectedContact,
 } from "../store/messageSlice.js";
+import { toastErrorHandler } from "./handler.js";
 
 export const messageApi = createApi({
   reducerPath: "messageApi",
@@ -73,29 +76,54 @@ export const messageApi = createApi({
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         try {
-          const { message, data } = await queryFulfilled;
+          const { data } = await queryFulfilled;
           dispatch(setMessages([data.data, ...getState().message.messages]));
-          const contackData = getState().message.contacts.find(
-            (val) => val.partnerChat?.email === arg.sendTo
-          );
+          const contackData =
+            getState().message.contacts.find(
+              (val) => val.partnerChat?.email === arg.sendTo
+            ) || getState().message.selectedContact;
           dispatch(
             setContacts([
               {
                 ...contackData,
                 latestMessage: arg.message?.text,
                 isTherePicture: Boolean(arg.message?.image),
+                latestMessageAt: data.data?.sentAt,
+                unread: data.data?.unread,
               },
               ...getState().message.contacts.filter(
                 (val) => val.partnerChat?.email !== arg.sendTo
               ),
             ])
           );
-          console.log("200: " + message);
+          console.log("200: " + data.message);
         } catch (error) {
           console.error(error);
           const status = error.error?.status || 500;
           const msg = error.error?.data?.error || "Failed to send message";
           console.error(`Error ${status}: ${msg}`);
+        }
+      },
+    }),
+    getSingleContact: builder.query({
+      query: ({ recipientEmail }) => `/api/message/contact/${recipientEmail}`,
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        try {
+          const existingContact = getState().message.contacts.find(
+            (contact) => contact.partnerChat.email === arg.recipientEmail
+          );
+          if (existingContact) {
+            dispatch(setSelectedContact(existingContact));
+          } else {
+            const { data } = await queryFulfilled;
+            dispatch(setSelectedContact(data?.data));
+            console.log(data.data);
+          }
+          dispatch(setIsModalOpen(false));
+          dispatch(setMessages([]));
+          console.log(getState().message.selectedContact);
+        } catch (error) {
+          toastErrorHandler(error.error, "Failed to get contact");
         }
       },
     }),
@@ -108,4 +136,6 @@ export const {
   useGetMessagesQuery,
   useLazyGetMessagesQuery,
   useSendMessageMutation,
+  useGetSingleContactQuery,
+  useLazyGetSingleContactQuery,
 } = messageApi;

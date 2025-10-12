@@ -16,14 +16,16 @@ function MessageList(props) {
   );
 
   useEffect(() => {
-    setIsLoading(true);
-    triggerGetMessages({
-      chatRoomId: selectedContact.chatRoomId,
-      params: null,
-      reset: true,
-    })
-      .unwrap()
-      .finally(() => setIsLoading(false));
+    if (selectedContact?.chatRoomId) {
+      setIsLoading(true);
+      triggerGetMessages({
+        chatRoomId: selectedContact.chatRoomId,
+        params: null,
+        reset: true,
+      })
+        .unwrap()
+        .finally(() => setIsLoading(false));
+    }
   }, [selectedContact.chatRoomId, triggerGetMessages]);
 
   const getMoreMessages = async () => {
@@ -39,6 +41,18 @@ function MessageList(props) {
 
   if (isLoading) {
     return <ChatSkeleton loop={10} />;
+  }
+
+  if (messages.length < 1) {
+    return (
+      <div
+        className={`${
+          props.imagePreview ? "hidden" : "flex"
+        } flex-1 flex-col justify-center items-center`}
+      >
+        <p className="text-base-content">Not Found</p>
+      </div>
+    );
   }
 
   return (

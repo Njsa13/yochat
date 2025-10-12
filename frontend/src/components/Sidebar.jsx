@@ -1,9 +1,9 @@
-import { Search, Image } from "lucide-react";
+import { Search, Image, MessageSquarePlus } from "lucide-react";
 import { useLazyGetContactsQuery } from "../services/messageApi.js";
 import { useEffect, useState } from "react";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton.jsx";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedContact } from "../store/messageSlice.js";
+import { setIsModalOpen, setSelectedContact } from "../store/messageSlice.js";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 function Sidebar() {
@@ -65,7 +65,7 @@ function Sidebar() {
     <div
       className={`${
         selectedContact || isProfileOpened ? "hidden lg:" : ""
-      }flex flex-col gap-4 pt-[80px] border-r border-base-content/10 overflow-auto`}
+      }flex flex-col gap-4 pt-[80px] border-r border-base-content/10 overflow-auto relative`}
     >
       <div className="px-5 flex flex-col gap-3">
         <h1 className="font-roboto font-semibold text-xl text-base-content">
@@ -159,7 +159,7 @@ function Sidebar() {
                       {contact.latestMessage}
                     </p>
                   </div>
-                  {contact.unread != 0 && (
+                  {contact.unread > 0 && (
                     <div className="number flex flex-col justify-center ml-auto mr-6">
                       <div className="bg-accent px-4 py-1 rounded-full">
                         <p className="text-neutral">{contact.unread}</p>
@@ -176,6 +176,14 @@ function Sidebar() {
           <p className="text-base-content">Not Found</p>
         </div>
       )}
+      <button
+        className="absolute bottom-5 right-8 bg-base-300 rounded-full"
+        onClick={() => dispatch(setIsModalOpen(true))}
+      >
+        <div className="bg-base-content p-3 btn btn-circle border-0 w-12 h-12 hover:opacity-70 transition-opacity duration-300">
+          <MessageSquarePlus className="text-base-300" />
+        </div>
+      </button>
     </div>
   );
 }
