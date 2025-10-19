@@ -61,6 +61,11 @@ export const getContacts = async (req, res, next) => {
       },
       include: {
         userChatRoom: {
+          where: {
+            userId: {
+              not: userId,
+            },
+          },
           include: {
             user: {
               select: {
@@ -94,13 +99,7 @@ export const getContacts = async (req, res, next) => {
 
     const result = chatRooms.map((val) => ({
       chatRoomId: val.chatRoomId,
-      partnerChat: val.userChatRoom
-        .filter((val) => val.userId !== userId)
-        .map((val) => ({
-          fullName: val.user.fullName,
-          email: val.user.email,
-          profilePicture: val.user.profilePicture,
-        }))[0],
+      partnerChat: val.userChatRoom[0]?.user,
       latestMessage: val.latestMessage || "No message",
       isTherePicture: val.isTherePicture,
       latestMessageAt: val.latestMessageAt,

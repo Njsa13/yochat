@@ -6,8 +6,8 @@ import authRouter from "./routes/authRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
 import errorHandler from "./middlewares/errorHandler.js";
 import passport from "./config/passport.js";
+import { app, server } from "./config/socket.js";
 
-const app = e();
 const PORT = process.env.BACKEND_PORT;
 
 app.use(
@@ -40,6 +40,6 @@ app.use("/api/message", messageRouter);
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server listening to port: ${PORT}`);
 });
