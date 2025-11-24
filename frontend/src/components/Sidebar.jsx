@@ -136,7 +136,11 @@ function Sidebar() {
                 }}
               >
                 <div className="user-card pl-5 py-4 flex gap-6">
-                  <div className="avatar avatar-online">
+                  <div
+                    className={`avatar ${
+                      contact.isOnline ? "avatar-online" : ""
+                    }`}
+                  >
                     <div className="w-13 rounded-full">
                       <img
                         src={

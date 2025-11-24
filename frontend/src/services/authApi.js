@@ -1,8 +1,17 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { toast } from "react-hot-toast";
 
-import { setCredentials, logout } from "../store/authSlice.js";
+import {
+  setCredentials,
+  logout,
+  connectSocket,
+  disconnectSocket,
+} from "../store/authSlice.js";
 import { toastErrorHandler } from "./handler.js";
+import {
+  subsToFriendStatus,
+  unSubsToFriendStatus,
+} from "../store/messageSlice.js";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -27,9 +36,11 @@ export const authApi = createApi({
     }),
     logout: builder.query({
       query: () => "/api/auth/logout",
-      async onQueryStarted(arg, { dispatch }) {
+      async onQueryStarted(arg, { dispatch, getState }) {
         try {
           dispatch(logout());
+          dispatch(unSubsToFriendStatus(getState().auth.socket));
+          dispatch(disconnectSocket());
         } catch (error) {
           toastErrorHandler(error.error, "Logout failed");
         }
@@ -57,10 +68,12 @@ export const authApi = createApi({
         url: `/api/auth/verify-email?token=${encodeURIComponent(token)}`,
         method: "PUT",
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setCredentials(data?.data));
+          dispatch(connectSocket());
+          dispatch(subsToFriendStatus(getState().auth.socket));
         } catch (error) {
           toastErrorHandler(error.error, "Failed to verify email");
         }
@@ -68,10 +81,12 @@ export const authApi = createApi({
     }),
     checkAuth: builder.query({
       query: () => "/api/auth/check-auth",
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setCredentials(data?.data));
+          dispatch(connectSocket());
+          dispatch(subsToFriendStatus(getState().auth.socket));
         } catch (error) {
           const status = error.error?.status || 500;
           const msg =

@@ -38,15 +38,15 @@ async function notifyFriendsStatusChange(email, status) {
     where: {
       userChatRoom: {
         some: {
-          userId: userId,
+          user: { email },
         },
       },
     },
     include: {
       userChatRoom: {
         where: {
-          userId: {
-            not: userId,
+          user: {
+            email: { not: email },
           },
         },
         include: {

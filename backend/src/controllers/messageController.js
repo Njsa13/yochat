@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 
 import cloudinary from "../config/cloudinary.js";
 import prisma from "../prisma/client.js";
+import { getSocketId } from "../config/socket.js";
 
 export const getContacts = async (req, res, next) => {
   try {
@@ -97,14 +98,18 @@ export const getContacts = async (req, res, next) => {
       ],
     });
 
-    const result = chatRooms.map((val) => ({
-      chatRoomId: val.chatRoomId,
-      partnerChat: val.userChatRoom[0]?.user,
-      latestMessage: val.latestMessage || "No message",
-      isTherePicture: val.isTherePicture,
-      latestMessageAt: val.latestMessageAt,
-      unread: val._count.messages,
-    }));
+    const result = chatRooms.map((val) => {
+      const isOnline = Boolean(getSocketId(val.userChatRoom[0]?.user.email));
+      return {
+        chatRoomId: val.chatRoomId,
+        partnerChat: val.userChatRoom[0]?.user,
+        latestMessage: val.latestMessage || "No message",
+        isTherePicture: val.isTherePicture,
+        latestMessageAt: val.latestMessageAt,
+        unread: val._count.messages,
+        isOnline,
+      };
+    });
     const hasNextPage = result.length > limit;
 
     res.status(200).json({

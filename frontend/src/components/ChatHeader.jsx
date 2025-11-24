@@ -9,7 +9,11 @@ function ChatHeader() {
   return (
     <div className="px-5 py-4 bg-base-100 mt-[68px] flex justify-between">
       <div className="flex gap-6 items-center">
-        <div className="avatar avatar-online">
+        <div
+          className={`avatar ${
+            selectedContact?.isOnline ? "avatar-online" : ""
+          }`}
+        >
           <div className="w-11 rounded-full">
             <img
               src={
@@ -24,7 +28,8 @@ function ChatHeader() {
           </h2>
           <p className="text-base-content/50 text-sm flex">
             {" "}
-            Online <Dot /> {selectedContact?.partnerChat?.email}
+            {selectedContact?.isOnline ? "Online" : "Offline"} <Dot />{" "}
+            {selectedContact?.partnerChat?.email}
           </p>
         </div>
       </div>

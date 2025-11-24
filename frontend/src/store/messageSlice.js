@@ -32,6 +32,31 @@ const messageSlice = createSlice({
     setIsModalOpen: (state, action) => {
       state.isModalOpen = action.payload;
     },
+    subsToFriendStatus: (state, action) => {
+      const socket = action.payload;
+
+      socket.on("friend-status-changed", (result) => {
+        if (result?.status === "online") {
+          state.contacts = state.contacts.map((contact) => {
+            if (contact.email !== result?.email) return;
+            contact.isOnline = true;
+          });
+        } else if (result?.status === "offline") {
+          state.contacts = state.contacts.map((contact) => {
+            if (contact.email !== result?.email) return;
+            contact.isOnline = false;
+          });
+        }
+      });
+    },
+    unSubsToFriendStatus: (action) => {
+      const socket = action.payload;
+      socket.off("friend-status-changed");
+    },
+    subsToNewMessage: (state, action) => {
+      const socket = action.payload;
+      // Todo: Lanjut
+    },
   },
 });
 
@@ -42,6 +67,8 @@ export const {
   deleteSelectedContacts,
   setMessages,
   setMessagesHasNextPage,
-  setIsModalOpen
+  setIsModalOpen,
+  subsToFriendStatus,
+  unSubsToFriendStatus,
 } = messageSlice.actions;
 export default messageSlice.reducer;
