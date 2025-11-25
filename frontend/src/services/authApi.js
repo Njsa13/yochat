@@ -4,14 +4,14 @@ import { toast } from "react-hot-toast";
 import {
   setCredentials,
   logout,
-  connectSocket,
-  disconnectSocket,
+  setSocketConnected,
 } from "../store/authSlice.js";
 import { toastErrorHandler } from "./handler.js";
 import {
   subsToFriendStatus,
   unSubsToFriendStatus,
 } from "../store/messageSlice.js";
+import { connectSocket, disconnectSocket } from "./socketService.js";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -39,8 +39,7 @@ export const authApi = createApi({
       async onQueryStarted(arg, { dispatch, getState }) {
         try {
           dispatch(logout());
-          dispatch(unSubsToFriendStatus(getState().auth.socket));
-          dispatch(disconnectSocket());
+          if (getState().auth.isSocketConnected) disconnectSocket();
         } catch (error) {
           toastErrorHandler(error.error, "Logout failed");
         }
@@ -72,8 +71,16 @@ export const authApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setCredentials(data?.data));
-          dispatch(connectSocket());
-          dispatch(subsToFriendStatus(getState().auth.socket));
+
+          const socket = connectSocket(getState().auth.user.email);
+          socket.on("connect", () => {
+            dispatch(setSocketConnected(true));
+            dispatch(subsToFriendStatus());
+          });
+          socket.on("disconnect", () => {
+            dispatch(unSubsToFriendStatus());
+            dispatch(setSocketConnected(false));
+          });
         } catch (error) {
           toastErrorHandler(error.error, "Failed to verify email");
         }
@@ -85,8 +92,16 @@ export const authApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setCredentials(data?.data));
-          dispatch(connectSocket());
-          dispatch(subsToFriendStatus(getState().auth.socket));
+
+          const socket = connectSocket(getState().auth.user.email);
+          socket.on("connect", () => {
+            dispatch(setSocketConnected(true));
+            dispatch(subsToFriendStatus());
+          });
+          socket.on("disconnect", () => {
+            dispatch(unSubsToFriendStatus());
+            dispatch(setSocketConnected(false));
+          });
         } catch (error) {
           const status = error.error?.status || 500;
           const msg =

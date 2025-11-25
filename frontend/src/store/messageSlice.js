@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { getSocket } from "../services/socketService";
 
 const messageSlice = createSlice({
   name: "message",
@@ -32,10 +33,11 @@ const messageSlice = createSlice({
     setIsModalOpen: (state, action) => {
       state.isModalOpen = action.payload;
     },
-    subsToFriendStatus: (state, action) => {
-      const socket = action.payload;
+    subsToFriendStatus: (state) => {
+      const socket = getSocket(); //Todo: Selanjutnya pindahkan listener ke socket.js
 
       socket.on("friend-status-changed", (result) => {
+        console.log("Berhasil");
         if (result?.status === "online") {
           state.contacts = state.contacts.map((contact) => {
             if (contact.email !== result?.email) return;
@@ -49,12 +51,12 @@ const messageSlice = createSlice({
         }
       });
     },
-    unSubsToFriendStatus: (action) => {
-      const socket = action.payload;
+    unSubsToFriendStatus: () => {
+      const socket = getSocket();
       socket.off("friend-status-changed");
     },
-    subsToNewMessage: (state, action) => {
-      const socket = action.payload;
+    subsToNewMessage: (state) => {
+      const socket = getSocket();
       // Todo: Lanjut
     },
   },

@@ -4,10 +4,14 @@ import AuthPageLogo from "../components/AuthPageLogo.jsx";
 import { useEffect, useRef, useState } from "react";
 import { useLoginMutation } from "../services/authApi.js";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { connectSocket, setCredentials } from "../store/authSlice.js";
+import { useDispatch } from "react-redux";
+import { setCredentials, setSocketConnected } from "../store/authSlice.js";
 import { toastErrorHandler } from "../services/handler.js";
-import { subsToFriendStatus } from "../store/messageSlice.js";
+import {
+  subsToFriendStatus,
+  unSubsToFriendStatus,
+} from "../store/messageSlice.js";
+import { connectSocket } from "../services/socketService.js";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -20,7 +24,6 @@ function LoginPage() {
     password: "",
   });
   const [login, { isLoading }] = useLoginMutation();
-  const socket = useSelector((state) => state.auth.socket);
 
   useEffect(() => {
     const errorParam = searchParams.get("error");
@@ -40,8 +43,18 @@ function LoginPage() {
     try {
       const result = await login(formData).unwrap();
       dispatch(setCredentials(result?.data));
-      dispatch(connectSocket());
-      dispatch(subsToFriendStatus(socket));
+
+      const socket = connectSocket(result?.data.email);
+
+      socket.on("connect", () => {
+        dispatch(setSocketConnected(true));
+        dispatch(subsToFriendStatus());
+      });
+
+      socket.on("disconnect", () => {
+        dispatch(unSubsToFriendStatus());
+        dispatch(setSocketConnected(false));
+      });
     } catch (error) {
       if (error.status === 403) {
         navigate(`/send-verification-email?email=${formData.username}`);

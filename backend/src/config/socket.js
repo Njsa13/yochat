@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import http from "http";
 import e from "express";
-import prisma from "../prisma/client";
+import prisma from "../prisma/client.js";
 
 const app = e();
 const server = http.createServer(app);
