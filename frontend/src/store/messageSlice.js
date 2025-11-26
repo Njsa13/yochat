@@ -33,31 +33,19 @@ const messageSlice = createSlice({
     setIsModalOpen: (state, action) => {
       state.isModalOpen = action.payload;
     },
-    subsToFriendStatus: (state) => {
-      const socket = getSocket(); //Todo: Selanjutnya pindahkan listener ke socket.js
-
-      socket.on("friend-status-changed", (result) => {
-        console.log("Berhasil");
-        if (result?.status === "online") {
-          state.contacts = state.contacts.map((contact) => {
-            if (contact.email !== result?.email) return;
-            contact.isOnline = true;
-          });
-        } else if (result?.status === "offline") {
-          state.contacts = state.contacts.map((contact) => {
-            if (contact.email !== result?.email) return;
-            contact.isOnline = false;
-          });
-        }
-      });
-    },
-    unSubsToFriendStatus: () => {
-      const socket = getSocket();
-      socket.off("friend-status-changed");
-    },
-    subsToNewMessage: (state) => {
-      const socket = getSocket();
-      // Todo: Lanjut
+    changeUserOnlineStatus: (state, action) => {
+      const result = action.payload;
+      if (result?.status === "online") {
+        state.contacts = state.contacts.map((contact) => {
+          if (contact.email !== result?.email) return;
+          contact.isOnline = true;
+        });
+      } else if (result?.status === "offline") {
+        state.contacts = state.contacts.map((contact) => {
+          if (contact.email !== result?.email) return;
+          contact.isOnline = false;
+        });
+      }
     },
   },
 });
@@ -70,7 +58,6 @@ export const {
   setMessages,
   setMessagesHasNextPage,
   setIsModalOpen,
-  subsToFriendStatus,
-  unSubsToFriendStatus,
+  changeUserOnlineStatus,
 } = messageSlice.actions;
 export default messageSlice.reducer;

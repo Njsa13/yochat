@@ -8,10 +8,10 @@ import { useDispatch } from "react-redux";
 import { setCredentials, setSocketConnected } from "../store/authSlice.js";
 import { toastErrorHandler } from "../services/handler.js";
 import {
+  connectSocket,
   subsToFriendStatus,
   unSubsToFriendStatus,
-} from "../store/messageSlice.js";
-import { connectSocket } from "../services/socketService.js";
+} from "../services/socketService.js";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -48,11 +48,11 @@ function LoginPage() {
 
       socket.on("connect", () => {
         dispatch(setSocketConnected(true));
-        dispatch(subsToFriendStatus());
+        subsToFriendStatus();
       });
 
       socket.on("disconnect", () => {
-        dispatch(unSubsToFriendStatus());
+        unSubsToFriendStatus();
         dispatch(setSocketConnected(false));
       });
     } catch (error) {

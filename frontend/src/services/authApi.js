@@ -8,10 +8,11 @@ import {
 } from "../store/authSlice.js";
 import { toastErrorHandler } from "./handler.js";
 import {
+  connectSocket,
+  disconnectSocket,
   subsToFriendStatus,
   unSubsToFriendStatus,
-} from "../store/messageSlice.js";
-import { connectSocket, disconnectSocket } from "./socketService.js";
+} from "./socketService.js";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -75,10 +76,10 @@ export const authApi = createApi({
           const socket = connectSocket(getState().auth.user.email);
           socket.on("connect", () => {
             dispatch(setSocketConnected(true));
-            dispatch(subsToFriendStatus());
+            subsToFriendStatus();
           });
           socket.on("disconnect", () => {
-            dispatch(unSubsToFriendStatus());
+            unSubsToFriendStatus();
             dispatch(setSocketConnected(false));
           });
         } catch (error) {
@@ -96,10 +97,10 @@ export const authApi = createApi({
           const socket = connectSocket(getState().auth.user.email);
           socket.on("connect", () => {
             dispatch(setSocketConnected(true));
-            dispatch(subsToFriendStatus());
+            subsToFriendStatus();
           });
           socket.on("disconnect", () => {
-            dispatch(unSubsToFriendStatus());
+            unSubsToFriendStatus();
             dispatch(setSocketConnected(false));
           });
         } catch (error) {
