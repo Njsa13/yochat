@@ -60,12 +60,12 @@ async function notifyFriendsStatusChange(email, status) {
     },
   });
 
-  const emails = chatRooms.flatMap((room) =>
+  const friendEmails = chatRooms.flatMap((room) =>
     room.userChatRoom.map((ucr) => ucr.user.email)
   );
 
-  emails.forEach((email) => {
-    const friendSocket = onlineUsers[email];
+  friendEmails.forEach((e) => {
+    const friendSocket = onlineUsers[e];
     if (friendSocket)
       io.to(friendSocket).emit("friend-status-changed", { email, status });
   });

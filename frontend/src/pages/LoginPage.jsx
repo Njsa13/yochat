@@ -48,7 +48,7 @@ function LoginPage() {
 
       socket.on("connect", () => {
         dispatch(setSocketConnected(true));
-        subsToFriendStatus();
+        subsToFriendStatus(dispatch);
       });
 
       socket.on("disconnect", () => {

@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getSocket } from "../services/socketService";
 
 const messageSlice = createSlice({
   name: "message",
@@ -34,17 +33,16 @@ const messageSlice = createSlice({
       state.isModalOpen = action.payload;
     },
     changeUserOnlineStatus: (state, action) => {
-      const result = action.payload;
-      if (result?.status === "online") {
-        state.contacts = state.contacts.map((contact) => {
-          if (contact.email !== result?.email) return;
-          contact.isOnline = true;
-        });
-      } else if (result?.status === "offline") {
-        state.contacts = state.contacts.map((contact) => {
-          if (contact.email !== result?.email) return;
-          contact.isOnline = false;
-        });
+      const { email, status } = action.payload;
+      console.log("Hasil: " + email + " " + status);
+      console.log("contacts:", JSON.parse(JSON.stringify(state.contacts)));
+      state.contacts = state.contacts.map((c) => {
+        if (c.partnerChat.email !== email) return c;
+        console.log(JSON.parse(JSON.stringify(c)));
+        return { ...c, isOnline: status === "online" };
+      });
+      if (state.selectedContact?.partnerChat.email === email) {
+        state.selectedContact.isOnline = status === "online";
       }
     },
   },

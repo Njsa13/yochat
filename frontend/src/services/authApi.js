@@ -76,7 +76,7 @@ export const authApi = createApi({
           const socket = connectSocket(getState().auth.user.email);
           socket.on("connect", () => {
             dispatch(setSocketConnected(true));
-            subsToFriendStatus();
+            subsToFriendStatus(dispatch);
           });
           socket.on("disconnect", () => {
             unSubsToFriendStatus();
@@ -97,7 +97,7 @@ export const authApi = createApi({
           const socket = connectSocket(getState().auth.user.email);
           socket.on("connect", () => {
             dispatch(setSocketConnected(true));
-            subsToFriendStatus();
+            subsToFriendStatus(dispatch);
           });
           socket.on("disconnect", () => {
             unSubsToFriendStatus();

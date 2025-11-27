@@ -1,6 +1,5 @@
 import { io } from "socket.io-client";
 
-import store from "../store/store.js";
 import { changeUserOnlineStatus } from "../store/messageSlice";
 
 let socket = null;
@@ -23,10 +22,10 @@ export const disconnectSocket = () => {
   }
 };
 
-export const subsToFriendStatus = () => {
+export const subsToFriendStatus = (dispatch) => {
   if (!socket || !socket?.connected) return;
   socket.on("friend-status-changed", (result) => {
-    store.dispatch(changeUserOnlineStatus(result));
+    dispatch(changeUserOnlineStatus(result));
   });
 };
 
