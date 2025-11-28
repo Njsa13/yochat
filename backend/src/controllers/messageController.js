@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 
 import cloudinary from "../config/cloudinary.js";
 import prisma from "../prisma/client.js";
-import { getSocketId } from "../config/socket.js";
+import { getSocketId, io } from "../config/socket.js";
 
 export const getContacts = async (req, res, next) => {
   try {
@@ -349,6 +349,17 @@ export const sendMessage = async (req, res, next) => {
         userId,
         chatRoomId: chatRoom.chatRoomId,
       },
+    });
+
+    const friendSocket = getSocketId(email);
+
+    io.to(friendSocket).emit("new-message-sidebar", {
+      messageId: message.messageId,
+      senderEmail: req.user.email,
+      text: message.text,
+      image: message.image,
+      sentAt: message.createdAt,
+      unread,
     });
 
     res.status(200).json({
