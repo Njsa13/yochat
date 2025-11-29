@@ -77,7 +77,9 @@ export const messageApi = createApi({
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setMessages([data.data, ...getState().message.messages]));
+          dispatch(
+            setMessages([data.data?.message, ...getState().message.messages])
+          );
           const contackData =
             getState().message.contacts.find(
               (val) => val.partnerChat?.email === arg.sendTo
@@ -88,7 +90,7 @@ export const messageApi = createApi({
                 ...contackData,
                 latestMessage: arg.message?.text,
                 isTherePicture: Boolean(arg.message?.image),
-                latestMessageAt: data.data?.sentAt,
+                latestMessageAt: data.data?.message.sentAt,
                 unread: data.data?.unread,
               },
               ...getState().message.contacts.filter(

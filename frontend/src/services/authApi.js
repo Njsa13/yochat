@@ -1,17 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { toast } from "react-hot-toast";
 
-import {
-  setCredentials,
-  logout,
-  setSocketConnected,
-} from "../store/authSlice.js";
+import { setCredentials, logout } from "../store/authSlice.js";
 import { toastErrorHandler } from "./handler.js";
 import {
   connectSocket,
   disconnectSocket,
-  subsToFriendStatus,
-  unSubsToFriendStatus,
+  initSocketSubs,
 } from "./socketService.js";
 
 export const authApi = createApi({
@@ -72,16 +67,8 @@ export const authApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setCredentials(data?.data));
-
-          const socket = connectSocket(getState().auth.user.email);
-          socket.on("connect", () => {
-            dispatch(setSocketConnected(true));
-            subsToFriendStatus(dispatch);
-          });
-          socket.on("disconnect", () => {
-            unSubsToFriendStatus();
-            dispatch(setSocketConnected(false));
-          });
+          connectSocket(getState().auth.user.email);
+          initSocketSubs(dispatch);
         } catch (error) {
           toastErrorHandler(error.error, "Failed to verify email");
         }
@@ -93,16 +80,8 @@ export const authApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setCredentials(data?.data));
-
-          const socket = connectSocket(getState().auth.user.email);
-          socket.on("connect", () => {
-            dispatch(setSocketConnected(true));
-            subsToFriendStatus(dispatch);
-          });
-          socket.on("disconnect", () => {
-            unSubsToFriendStatus();
-            dispatch(setSocketConnected(false));
-          });
+          connectSocket(getState().auth.user.email);
+          initSocketSubs(dispatch);
         } catch (error) {
           const status = error.error?.status || 500;
           const msg =

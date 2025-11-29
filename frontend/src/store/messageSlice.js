@@ -34,11 +34,8 @@ const messageSlice = createSlice({
     },
     changeUserOnlineStatus: (state, action) => {
       const { email, status } = action.payload;
-      console.log("Hasil: " + email + " " + status);
-      console.log("contacts:", JSON.parse(JSON.stringify(state.contacts)));
       state.contacts = state.contacts.map((c) => {
         if (c.partnerChat.email !== email) return c;
-        console.log(JSON.parse(JSON.stringify(c)));
         return { ...c, isOnline: status === "online" };
       });
       if (state.selectedContact?.partnerChat.email === email) {

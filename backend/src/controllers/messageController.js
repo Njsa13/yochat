@@ -260,7 +260,7 @@ export const getMessages = async (req, res, next) => {
 
 export const sendMessage = async (req, res, next) => {
   try {
-    const { userId } = req.user;
+    const { userId, email: myEmail, fullName, profilePicture } = req.user;
     const { text, image } = req.body;
     const { email } = req.params;
 
@@ -271,7 +271,6 @@ export const sendMessage = async (req, res, next) => {
     }
 
     const chatPartner = await prisma.user.findUnique({
-      select: { userId: true, isEmailVerified: true },
       where: { email },
     });
 
@@ -290,7 +289,7 @@ export const sendMessage = async (req, res, next) => {
     let chatRoom = (
       await prisma.$queryRaw(
         Prisma.sql`
-          select c.chat_room_id 
+          select c.* 
           from chat_room c
           join user_chat_room uc 
           on c.chat_room_id = uc.chat_room_id
@@ -300,8 +299,6 @@ export const sendMessage = async (req, res, next) => {
         `
       )
     )[0];
-
-    let unread = 0;
 
     if (!chatRoom) {
       chatRoom = await prisma.chatRoom.create({
@@ -326,14 +323,6 @@ export const sendMessage = async (req, res, next) => {
           latestMessageAt: new Date(),
         },
       });
-
-      unread = await prisma.message.count({
-        where: {
-          userId: chatPartner.userId,
-          chatRoomId: chatRoom.chatRoomId,
-          isRead: false,
-        },
-      });
     }
 
     let imageUrl = null;
@@ -351,25 +340,60 @@ export const sendMessage = async (req, res, next) => {
       },
     });
 
+    const unread = await prisma.message.count({
+      where: {
+        userId: chatPartner.userId,
+        chatRoomId: chatRoom.chatRoomId,
+        isRead: false,
+      },
+    });
+
+    const unreadForPartner = await prisma.message.count({
+      where: {
+        userId: userId,
+        chatRoomId: chatRoom.chatRoomId,
+        isRead: false,
+      },
+    });
+
     const friendSocket = getSocketId(email);
+    const isOnline = Boolean(getSocketId(myEmail));
+
+    console.log(chatRoom);
+    console.log(chatPartner);
 
     io.to(friendSocket).emit("new-message-sidebar", {
+      chatRoomId: chatRoom.chatRoomId,
+      partnerChat: {
+        fullName,
+        email: myEmail,
+        profilePicture,
+      },
+      latestMessage: chatRoom.latestMessage || "No message",
+      isTherePicture: chatRoom.isTherePicture,
+      latestMessageAt: chatRoom.latestMessageAt,
+      unread: unreadForPartner,
+      isOnline,
+    });
+
+    io.to(friendSocket).emit("new-message", {
       messageId: message.messageId,
       senderEmail: req.user.email,
       text: message.text,
       image: message.image,
       sentAt: message.createdAt,
-      unread,
     });
 
     res.status(200).json({
       message: "Message successfully sent",
       data: {
-        messageId: message.messageId,
-        senderEmail: req.user.email,
-        text: message.text,
-        image: message.image,
-        sentAt: message.createdAt,
+        message: {
+          messageId: message.messageId,
+          senderEmail: req.user.email,
+          text: message.text,
+          image: message.image,
+          sentAt: message.createdAt,
+        },
         unread,
       },
     });

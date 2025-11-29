@@ -5,13 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { useLoginMutation } from "../services/authApi.js";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setCredentials, setSocketConnected } from "../store/authSlice.js";
+import { setCredentials } from "../store/authSlice.js";
 import { toastErrorHandler } from "../services/handler.js";
-import {
-  connectSocket,
-  subsToFriendStatus,
-  unSubsToFriendStatus,
-} from "../services/socketService.js";
+import { connectSocket, initSocketSubs } from "../services/socketService.js";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -43,18 +39,8 @@ function LoginPage() {
     try {
       const result = await login(formData).unwrap();
       dispatch(setCredentials(result?.data));
-
-      const socket = connectSocket(result?.data.email);
-
-      socket.on("connect", () => {
-        dispatch(setSocketConnected(true));
-        subsToFriendStatus(dispatch);
-      });
-
-      socket.on("disconnect", () => {
-        unSubsToFriendStatus();
-        dispatch(setSocketConnected(false));
-      });
+      connectSocket(result?.data.email);
+      initSocketSubs(dispatch);
     } catch (error) {
       if (error.status === 403) {
         navigate(`/send-verification-email?email=${formData.username}`);

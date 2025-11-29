@@ -1,9 +1,13 @@
 import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetMessagesQuery } from "../services/messageApi";
 import InfiniteScroll from "react-infinite-scroll-component";
 import ChatSkeleton from "./skeletons/ChatSkeleton";
+import {
+  subsToNewMessage,
+  unSubsToNewMessage,
+} from "../services/socketService";
 
 function MessageList(props) {
   const authUser = useSelector((state) => state.auth.user);
@@ -11,6 +15,7 @@ function MessageList(props) {
   const selectedContact = useSelector((state) => state.message.selectedContact);
   const [triggerGetMessages] = useLazyGetMessagesQuery();
   const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
   const messagesHasNextPage = useSelector(
     (state) => state.message.messagesHasNextPage
   );
@@ -25,8 +30,11 @@ function MessageList(props) {
       })
         .unwrap()
         .finally(() => setIsLoading(false));
+
+      subsToNewMessage(dispatch);
+      return () => unSubsToNewMessage();
     }
-  }, [selectedContact.chatRoomId, triggerGetMessages]);
+  }, [dispatch, selectedContact?.chatRoomId, triggerGetMessages]);
 
   const getMoreMessages = async () => {
     triggerGetMessages({
