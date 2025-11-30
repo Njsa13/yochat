@@ -402,3 +402,45 @@ export const sendMessage = async (req, res, next) => {
     next(error);
   }
 };
+
+export const readMessage = async (req, res, next) => {
+  try {
+    const { chatRoomId } = req.params;
+    const { userId } = req.user;
+
+    const exists = !!(await prisma.message.findFirst(
+      { select: { id: true } },
+      {
+        where: {
+          userId: { not: userId },
+          chatRoomId,
+          isRead: false,
+        },
+      }
+    ));
+
+    if (exists) {
+      await prisma.message.updateMany({
+        where: {
+          userId: { not: userId },
+          chatRoomId,
+          isRead: false,
+        },
+        data: {
+          isRead: true,
+        },
+      });
+
+      return res.status(200).json({
+        message: "Message successfully updated",
+      });
+    }
+
+    res.status(204).json({
+      message: "Nothing updated",
+    });
+  } catch (error) {
+    console.error("Error in readMessage function: ", error);
+    next(error);
+  }
+};

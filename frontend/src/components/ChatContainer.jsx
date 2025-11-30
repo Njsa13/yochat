@@ -5,15 +5,22 @@ import MessageInput from "./MessageInput.jsx";
 import MessageList from "./MessageList.jsx";
 import { useEffect, useState } from "react";
 import { useRef } from "react";
+import { useReadMessageMutation } from "../services/messageApi.js";
 
 function ChatContainer() {
   const selectedContact = useSelector((state) => state.message.selectedContact);
   const [imagePreview, setImagePreview] = useState(null);
   const imageRef = useRef(null);
+  const [readMessage] = useReadMessageMutation();
 
   useEffect(() => {
     setImagePreview(null);
-  }, [selectedContact]);
+    if (selectedContact?.unread > 0) {
+      (async () => {
+        await readMessage({ chatRoomId: selectedContact.chatRoomId });
+      })();
+    }
+  }, [readMessage, selectedContact.chatRoomId, selectedContact?.unread]);
 
   return (
     <div

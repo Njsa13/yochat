@@ -129,6 +129,38 @@ export const messageApi = createApi({
         }
       },
     }),
+    readMessage: builder.mutation({
+      query: ({ chatRoomId }) => ({
+        url: `/api/message/read/${chatRoomId}`,
+        method: "PUT",
+      }),
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        try {
+          const { data, meta } = await queryFulfilled;
+          console.log(data.message);
+          if (meta.response.status === 200) {
+            const contackData =
+              getState().message.contacts.find(
+                (val) => val.chatRoomId === arg.chatRoomId
+              ) || getState().message.selectedContact;
+            dispatch(
+              setContacts([
+                {
+                  ...contackData,
+                  unread: 0,
+                },
+                ...getState().message.contacts.filter(
+                  (val) => val.chatRoomId !== arg.chatRoomId
+                ),
+              ])
+            );
+          }
+        } catch (error) {
+          const msg = error.data?.message || "Failed to read message";
+          console.log(msg);
+        }
+      },
+    }),
   }),
 });
 
@@ -140,4 +172,5 @@ export const {
   useSendMessageMutation,
   useGetSingleContactQuery,
   useLazyGetSingleContactQuery,
+  useReadMessageMutation,
 } = messageApi;
