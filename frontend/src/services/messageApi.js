@@ -136,23 +136,20 @@ export const messageApi = createApi({
       }),
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         try {
-          const { data, meta } = await queryFulfilled;
-          console.log(data.message);
+          const { meta } = await queryFulfilled;
           if (meta.response.status === 200) {
-            const contackData =
-              getState().message.contacts.find(
-                (val) => val.chatRoomId === arg.chatRoomId
-              ) || getState().message.selectedContact;
             dispatch(
-              setContacts([
-                {
-                  ...contackData,
-                  unread: 0,
-                },
-                ...getState().message.contacts.filter(
-                  (val) => val.chatRoomId !== arg.chatRoomId
-                ),
-              ])
+              setContacts(
+                getState().message.contacts.map((val) => {
+                  if (val.chatRoomId === arg.chatRoomId) {
+                    return {
+                      ...val,
+                      unread: 0,
+                    };
+                  }
+                  return val;
+                })
+              )
             );
           }
         } catch (error) {

@@ -359,9 +359,6 @@ export const sendMessage = async (req, res, next) => {
     const friendSocket = getSocketId(email);
     const isOnline = Boolean(getSocketId(myEmail));
 
-    console.log(chatRoom);
-    console.log(chatPartner);
-
     io.to(friendSocket).emit("new-message-sidebar", {
       chatRoomId: chatRoom.chatRoomId,
       partnerChat: {
@@ -409,7 +406,7 @@ export const readMessage = async (req, res, next) => {
     const { userId } = req.user;
 
     const exists = !!(await prisma.message.findFirst(
-      { select: { id: true } },
+      { select: { messageId: true } },
       {
         where: {
           userId: { not: userId },

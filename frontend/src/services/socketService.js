@@ -57,10 +57,7 @@ export const initSocketSubs = (dispatch) => {
 
 export const subsToNewMessage = (dispatch) => {
   if (!socket) return;
-  console.log("Cek 1");
   socket.on("new-message", (result) => {
-    console.log("Cek 2");
-    console.log(result);
     dispatch((dispatch, getState) => {
       if (
         getState().message.selectedContact?.partnerChat.email ===

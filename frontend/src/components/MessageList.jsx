@@ -34,7 +34,7 @@ function MessageList(props) {
       subsToNewMessage(dispatch);
       return () => unSubsToNewMessage();
     }
-  }, [dispatch, selectedContact?.chatRoomId, triggerGetMessages]);
+  }, [dispatch, selectedContact.chatRoomId, triggerGetMessages]);
 
   const getMoreMessages = async () => {
     triggerGetMessages({
