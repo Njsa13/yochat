@@ -33,11 +33,7 @@ export const messageApi = createApi({
           }
           dispatch(setContactsHasNextPage(data?.hasNextPage));
         } catch (error) {
-          console.error(error);
-          const status = error.error?.status || 500;
-          const msg =
-            error.error?.data?.error || "Failed to retrieve contacts data";
-          console.error(`Error ${status}: ${msg}`);
+          toastErrorHandler(error.error, "Failed to retrieve contacts data");
         }
       },
     }),
@@ -60,11 +56,7 @@ export const messageApi = createApi({
 
           dispatch(setMessagesHasNextPage(data?.hasNextPage));
         } catch (error) {
-          console.error(error);
-          const status = error.error?.status || 500;
-          const msg =
-            error.error?.data?.error || "Failed to retrieve messages data";
-          console.error(`Error ${status}: ${msg}`);
+          toastErrorHandler(error.error, "Failed to retrieve messages data");
         }
       },
     }),
@@ -100,10 +92,7 @@ export const messageApi = createApi({
           );
           console.log("200: " + data.message);
         } catch (error) {
-          console.error(error);
-          const status = error.error?.status || 500;
-          const msg = error.error?.data?.error || "Failed to send message";
-          console.error(`Error ${status}: ${msg}`);
+          toastErrorHandler(error.error, "Failed to send message");
         }
       },
     }),
