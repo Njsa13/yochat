@@ -140,6 +140,12 @@ export const messageApi = createApi({
                 })
               )
             );
+            dispatch(
+              setSelectedContact({
+                ...getState().message.selectedContact,
+                unread: 0,
+              })
+            );
           }
         } catch (error) {
           const msg = error.data?.message || "Failed to read message";

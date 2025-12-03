@@ -4,6 +4,7 @@ import {
   changeUserOnlineStatus,
   setContacts,
   setMessages,
+  setSelectedContact,
 } from "../store/messageSlice";
 import { setSocketConnected } from "../store/authSlice";
 
@@ -47,6 +48,17 @@ export const initSocketSubs = (dispatch) => {
           ),
         ])
       );
+
+      if (
+        getState().message.selectedContact?.chatRoomId === result.chatRoomId
+      ) {
+        dispatch(
+          setSelectedContact({
+            ...getState().message.selectedContact,
+            unread: result.unread,
+          })
+        );
+      }
     });
   });
 
