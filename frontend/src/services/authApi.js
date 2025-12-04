@@ -127,6 +127,7 @@ export const {
   useLoginMutation,
   useRegisterMutation,
   useLogoutQuery,
+  useLazyLogoutQuery,
   useSendEmailVerificationMutation,
   useVerifyEmailMutation,
   useCheckAuthQuery,

@@ -4,6 +4,7 @@ import { deleteSelectedContacts } from "../store/messageSlice";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import {
+  useLazyLogoutQuery,
   useUpdateProfileMutation,
   useUpdateProfilePicMutation,
 } from "../services/authApi";
@@ -23,6 +24,11 @@ function UserProfile() {
     useUpdateProfileMutation();
   const [updateProfilePic] = useUpdateProfilePicMutation();
   const [isLoadingUpdatePic, setIsLoadingUpdatePic] = useState(false);
+  const [triggerLogout, { isLoading: isLoadingLogout }] = useLazyLogoutQuery();
+
+  const logoutHandler = () => {
+    triggerLogout();
+  };
 
   const updateProfileHandler = async (e) => {
     e.preventDefault();
@@ -177,6 +183,16 @@ function UserProfile() {
                 }
               >
                 {isLoadingUpdateProfile ? "Loading..." : "Submit"}
+              </button>
+            </div>
+            <div className="form-control max-w-md lg:min-w-sm w-full">
+              <button
+                type="button"
+                className="font-medium rounded-lg btn btn-error w-full text-error-content font-roboto"
+                disabled={isLoadingLogout}
+                onClick={logoutHandler}
+              >
+                Log Out
               </button>
             </div>
           </form>
