@@ -26,8 +26,13 @@ function UserProfile() {
   const [isLoadingUpdatePic, setIsLoadingUpdatePic] = useState(false);
   const [triggerLogout, { isLoading: isLoadingLogout }] = useLazyLogoutQuery();
 
-  const logoutHandler = () => {
-    triggerLogout();
+  const logoutHandler = async () => {
+    try {
+      await triggerLogout().unwrap();
+      window.location.reload();
+    } catch (error) {
+      console.error("Error on logoutHandler: ", error.message);
+    }
   };
 
   const updateProfileHandler = async (e) => {
