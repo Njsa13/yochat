@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { toast } from "react-hot-toast";
 
-import { setCredentials, logout } from "../store/authSlice.js";
+import { setCredentials } from "../store/authSlice.js";
 import { toastErrorHandler } from "./handler.js";
 import {
   connectSocket,
@@ -32,9 +32,8 @@ export const authApi = createApi({
     }),
     logout: builder.query({
       query: () => "/api/auth/logout",
-      async onQueryStarted(arg, { dispatch, getState }) {
+      async onQueryStarted(arg, { getState }) {
         try {
-          dispatch(logout());
           if (getState().auth.isSocketConnected) disconnectSocket();
         } catch (error) {
           toastErrorHandler(error.error, "Logout failed");
@@ -86,7 +85,7 @@ export const authApi = createApi({
           const status = error.error?.status || 500;
           const msg =
             error.error?.data?.error || "Failed to retrieve user data";
-          console.error(`Error ${status}: ${msg}`);
+          if (status !== 401) console.error(`Error ${status}: ${msg}`);
         }
       },
     }),

@@ -7,14 +7,11 @@ const authSlice = createSlice({
     setCredentials: (state, action) => {
       state.user = action.payload;
     },
-    logout: (state) => {
-      state.user = null;
-    },
     setSocketConnected: (state, action) => {
       state.isSocketConnected = action.payload;
     },
   },
 });
 
-export const { setCredentials, logout, setSocketConnected } = authSlice.actions;
+export const { setCredentials, setSocketConnected } = authSlice.actions;
 export default authSlice.reducer;
