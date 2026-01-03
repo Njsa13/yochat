@@ -73,9 +73,8 @@ Follow the steps below to set up and run the project using Docker.
 6. Database migration
 
    ```bash
-   docker compose exec backend bash
-   npx prisma migrate deploy
-   npx prisma generate
+   docker compose exec backend npx prisma migrate deploy
+   docker compose exec backend npx prisma generate
    ```
 
 7. Once the application is running:
