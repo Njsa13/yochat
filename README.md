@@ -25,23 +25,67 @@ This application is designed to provide a simple and user-friendly communication
 - [![ReactJS][React.js]][React-url]
 - [![ReduxJS][Redux.js]][Redux-url]
 - [![TailwindCSS][Tailwind.css]][Tailwind-url]
+- [![DaisyUI][DaisyUI.com]][DaisyUI-url]
 - [![Docker][Docker]][Docker-url]
 
 ## Getting Started
 
-To get started with the project, follow these steps:
+Follow the steps below to set up and run the project using Docker.
+
+### Prerequisites
+
+- Docker
+- Docker Compose
+
+### External Services
+
+- Google OAuth – used for user authentication
+- Cloudinary – used for image upload and storage
+
+### Installation
+
+1. Clone the repository
+
+   ```bash
+   git clone https://github.com/Njsa13/yochat.git
+   ```
+
+2. Enter the root directory
+
+   ```bash
+   cd yochat
+   ```
+
+3. Copy the `.env.example` file and rename it to `.env`
+
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Update the environment variables in the `.env` file
+
+5. Build docker image
+
+   ```bash
+   docker compose up --build -d
+   ```
+
+6. Database migration
+
+   ```bash
+   docker compose exec backend bash
+   npx prisma migrate deploy
+   npx prisma generate
+   ```
+
+7. Once the application is running:
+
+   - Frontend: http://localhost:5173
+   - Backend: http://localhost:8000
 
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
-## Acknowledgments
-
-This project was inspired by several tutorials and documentation:
-
-- Socket.IO Documentation
-- Prisma Docs
-- React Official Docs
 
 [Node.js]: https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white
 [Node-url]: https://nodejs.org
@@ -58,4 +102,6 @@ This project was inspired by several tutorials and documentation:
 [Tailwind.css]: https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white
 [Tailwind-url]: https://tailwindcss.com
 [Docker]: https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white
-[Docker-url]: https://www.docker.com/
+[Docker-url]: https://www.docker.com
+[DaisyUI.com]: https://img.shields.io/badge/daisyui-5A0EF8?style=for-the-badge&logo=daisyui&logoColor=white
+[DaisyUI-url]: https://daisyui.com
