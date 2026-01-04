@@ -1,9 +1,8 @@
 # YoChat
 
-![Thumbnail](frontend/public/thumbnail.png)
+YoChat is a web-based chat application that allows users to communicate with each other in real time through online messaging. This application is designed to provide a simple and user-friendly communication platform accessible via a web browser.
 
-YoChat is a web-based chat application that allows users to communicate with each other in real time through online messaging.  
-This application is designed to provide a simple and user-friendly communication platform accessible via a web browser.
+![Thumbnail](frontend/public/thumbnail.png)
 
 ### Objectives
 
