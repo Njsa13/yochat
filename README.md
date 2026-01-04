@@ -78,10 +78,7 @@ Follow the steps below to set up and run the project using Docker.
    docker compose exec backend npx prisma generate
    ```
 
-7. Once the application is running:
-
-   - Frontend: http://localhost:5173
-   - Backend: http://localhost:8000
+7. Once the application is running, open the application at http://localhost:5173
 
 ## 📝 License
 
