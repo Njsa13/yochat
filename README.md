@@ -1,4 +1,4 @@
-# YoChat
+# 💬 YoChat
 
 YoChat is a web-based chat application that allows users to communicate with each other in real time through online messaging. This application is designed to provide a simple and user-friendly communication platform accessible via a web browser.
 
@@ -29,7 +29,7 @@ YoChat is a web-based chat application that allows users to communicate with eac
 - [![DaisyUI][DaisyUI.com]][DaisyUI-url]
 - [![Docker][Docker]][Docker-url]
 
-## Getting Started
+## 🚀 Getting Started
 
 Follow the steps below to set up and run the project using Docker.
 
@@ -83,7 +83,7 @@ Follow the steps below to set up and run the project using Docker.
    - Frontend: http://localhost:5173
    - Backend: http://localhost:8000
 
-## License
+## 📝 License
 
 This project is licensed under the [MIT License](LICENSE).
 
